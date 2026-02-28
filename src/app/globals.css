@@ -1213,25 +1213,3 @@ body {
 .doc-table td code {
   font-size: 11px;
 }
-
-/* ── OMGHOST FOOTER LOGO ─────────────────────── */
-.omghost-footer-logo {
-  display: flex;
-  justify-content: center;
-  padding: 24px 0 32px;
-  background: var(--black);
-}
-
-.omghost-footer-logo a {
-  opacity: 0.25;
-  transition: opacity 0.3s ease;
-}
-
-.omghost-footer-logo a:hover {
-  opacity: 0.5;
-}
-
-.omghost-footer-logo img {
-  width: 32px;
-  height: auto;
-}
