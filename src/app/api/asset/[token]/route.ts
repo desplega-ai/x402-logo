@@ -15,30 +15,27 @@ export async function GET(
       );
     }
 
-    const generation = await prisma.logoGeneration.findUnique({
+    const asset = await prisma.asset.findUnique({
       where: { token },
-      select: {
-        svgContent: true,
-        brandName: true,
+      include: {
         style: { select: { name: true } },
-        createdAt: true,
       },
     });
 
-    if (!generation || !generation.svgContent) {
+    if (!asset) {
       return NextResponse.json(
         { error: "Asset not found" },
         { status: 404 }
       );
     }
 
-    return new NextResponse(generation.svgContent, {
-      status: 200,
-      headers: {
-        "Content-Type": "image/svg+xml",
-        "Content-Disposition": `inline; filename="${generation.brandName}-logo.svg"`,
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
+    return NextResponse.json({
+      token: asset.token,
+      svg: asset.asset,
+      style: asset.style.name,
+      brandName: asset.brandName,
+      brandVoice: asset.brandVoice,
+      createdAt: asset.createdAt,
     });
   } catch (error) {
     console.error("Error fetching asset:", error);

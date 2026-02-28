@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod/v4";
 
 const rateSchema = z.object({
-  token: z.string().uuid("A valid generation token is required"),
+  token: z.string().uuid("A valid token is required"),
+  text: z.string().max(1000).optional(),
   rating: z.number().int().min(1).max(5),
-  feedback: z.string().max(1000).optional(),
+  styleName: z.string().min(1, "Style name is required"),
 });
 
 export async function POST(request: NextRequest) {
@@ -20,84 +21,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { token, rating, feedback } = parsed.data;
+    const { token, text, rating, styleName } = parsed.data;
 
-    // Find the generation by token
-    const generation = await prisma.logoGeneration.findUnique({
+    // Validate no duplicate rating for this token
+    const existing = await prisma.rate.findUnique({
       where: { token },
-      include: { style: true },
     });
 
-    if (!generation) {
+    if (existing) {
       return NextResponse.json(
-        { error: "Generation not found. Invalid token." },
-        { status: 404 }
-      );
-    }
-
-    // Verify that a payment actually happened
-    if (!generation.paymentTxHash) {
-      return NextResponse.json(
-        { error: "No payment record found for this generation. Review rewards require a verified payment." },
-        { status: 402 }
-      );
-    }
-
-    // Idempotency — rating + reward can only happen once
-    if (generation.rating !== null) {
-      return NextResponse.json(
-        { error: "This logo has already been reviewed" },
+        { error: "This token has already been rated" },
         { status: 409 }
       );
     }
 
-    // Calculate 30% review reward
-    const rewardUsd = Number(generation.priceUsd) * 0.3;
+    // Find the style
+    const style = await prisma.style.findUnique({
+      where: { name: styleName },
+    });
 
-    // TODO: Execute x402 reward transaction
-    const rewardTxHash = null; // Will be set when x402 reward payout is implemented
+    if (!style) {
+      return NextResponse.json(
+        { error: `Style "${styleName}" not found` },
+        { status: 404 }
+      );
+    }
 
-    // Update the generation with rating and reward info
-    const updated = await prisma.logoGeneration.update({
-      where: { token },
+    // Save the rating
+    await prisma.rate.create({
       data: {
+        token,
+        text: text ?? null,
         rating,
-        ratingFeedback: feedback ?? null,
-        rewardUsd,
-        rewardTxHash,
+        styleId: style.id,
       },
     });
 
-    // Update the style's aggregate rating
-    const styleStats = await prisma.logoGeneration.aggregate({
-      where: {
-        styleId: generation.styleId,
-        rating: { not: null },
-      },
+    // Recalculate average rating for the style
+    const aggregate = await prisma.rate.aggregate({
+      where: { styleId: style.id },
       _avg: { rating: true },
-      _count: { rating: true },
     });
+
+    const newAverage = aggregate._avg.rating ?? 0;
 
     await prisma.style.update({
-      where: { id: generation.styleId },
-      data: {
-        rating: styleStats._avg.rating ?? 0,
-        ratingCount: styleStats._count.rating,
-      },
+      where: { id: style.id },
+      data: { averageRating: newAverage },
     });
 
     return NextResponse.json({
-      id: updated.id,
-      token: updated.token,
-      rating: updated.rating,
-      rewardUsd: Number(rewardUsd),
-      rewardTxHash,
-      message: `Thanks for your review! Your ${Number(rewardUsd).toFixed(4)} USDC reward is ${rewardTxHash ? "on its way" : "pending"}.`,
+      success: true,
+      averageRating: newAverage,
     });
   } catch (error) {
-    console.error("Error rating logo:", error);
+    console.error("Error rating:", error);
     return NextResponse.json(
-      { error: "Failed to submit review" },
+      { error: "Failed to submit rating" },
       { status: 500 }
     );
   }
