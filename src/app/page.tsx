@@ -277,6 +277,14 @@ export default function Home() {
         </div>
         <div className="footer-copy">&copy; 2026 omghost &middot; Built with x402</div>
       </footer>
+
+      {/* ── ATTRIBUTION ──────────────────────────────── */}
+      <div className="attribution">
+        made with 🫶🏽 by{" "}
+        <a href="https://www.agent-swarm.dev/" target="_blank" rel="noopener noreferrer">
+          agent-swarm
+        </a>
+      </div>
     </>
   );
 }
