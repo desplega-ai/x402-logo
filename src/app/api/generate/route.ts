@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateSvg } from "@/lib/generate-svg";
+import { generateSvgForJob } from "@/lib/generate-svg";
 import { z } from "zod/v4";
 
 const generateSchema = z.object({
@@ -23,15 +23,8 @@ export async function POST(request: NextRequest) {
 
     const { styleName, brandName, brandVoice } = parsed.data;
 
-    // Load style with systemPrompt and svgExamples for generation
     const style = await prisma.style.findUnique({
       where: { name: styleName },
-      select: {
-        id: true,
-        name: true,
-        systemPrompt: true,
-        svgExamples: true,
-      },
     });
 
     if (!style) {
@@ -48,59 +41,24 @@ export async function POST(request: NextRequest) {
         styleId: style.id,
         brandName: brandName ?? null,
         brandVoice: brandVoice ?? null,
-        status: "processing",
+        status: "pending",
       },
     });
 
-    try {
-      // Generate SVG via OpenRouter
-      const svg = await generateSvg({
-        systemPrompt: style.systemPrompt,
-        svgExamples: Array.isArray(style.svgExamples)
-          ? (style.svgExamples as string[])
-          : [],
-        brandName,
-        brandVoice,
-      });
+    // Fire-and-forget: kick off SVG generation in the background
+    generateSvgForJob(job.id).catch((err) => {
+      console.error(`Background SVG generation failed for job ${job.id}:`, err);
+    });
 
-      const asset = await prisma.asset.create({
-        data: {
-          asset: svg,
-          styleId: style.id,
-          brandName: brandName ?? null,
-          brandVoice: brandVoice ?? null,
-          jobId: job.id,
-        },
-      });
-
-      // Mark job as completed
-      await prisma.generationJob.update({
-        where: { id: job.id },
-        data: { status: "completed" },
-      });
-
-      return NextResponse.json({
-        token: asset.token,
-        svg: asset.asset,
-        style: style.name,
-      });
-    } catch (genError) {
-      // Mark job as failed
-      await prisma.generationJob.update({
-        where: { id: job.id },
-        data: {
-          status: "failed",
-          error:
-            genError instanceof Error ? genError.message : "Unknown error",
-          retryCount: { increment: 1 },
-        },
-      });
-      throw genError;
-    }
+    // Return immediately with the job ID for polling
+    return NextResponse.json({
+      jobId: job.id,
+      status: "pending",
+    });
   } catch (error) {
-    console.error("Error generating asset:", error);
+    console.error("Error creating generation job:", error);
     return NextResponse.json(
-      { error: "Failed to generate asset" },
+      { error: "Failed to create generation job" },
       { status: 500 }
     );
   }

@@ -10,18 +10,23 @@ export async function GET(
 
     const job = await prisma.generationJob.findUnique({
       where: { id: jobId },
-      include: { asset: true },
+      include: {
+        asset: {
+          select: { token: true, asset: true },
+        },
+      },
     });
 
     if (!job) {
       return NextResponse.json(
-        { error: "Job not found" },
+        { error: "Generation job not found" },
         { status: 404 }
       );
     }
 
     if (job.status === "completed" && job.asset) {
       return NextResponse.json({
+        jobId: job.id,
         status: "completed",
         token: job.asset.token,
         svg: job.asset.asset,
@@ -31,6 +36,7 @@ export async function GET(
 
     if (job.status === "failed") {
       return NextResponse.json({
+        jobId: job.id,
         status: "failed",
         error: job.error,
       });
@@ -38,6 +44,7 @@ export async function GET(
 
     // pending or processing
     return NextResponse.json({
+      jobId: job.id,
       status: job.status,
     });
   } catch (error) {
