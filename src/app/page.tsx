@@ -148,21 +148,21 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-50 border border-brand-200 rounded-full text-sm font-medium text-brand-700 mb-8">
             <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-            Powered by x402 micropayments
+            Fueled by x402 micropayments
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6">
-            Instant SVG Icons
+            Your SVGs Look Boring.
             <br />
             <span className="bg-gradient-to-r from-brand-500 via-accent-500 to-brand-600 bg-clip-text text-transparent">
-              via API
+              We Fix That.
             </span>
           </h1>
 
           <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Professional vector icons in seconds. Choose from 8 hand-crafted
-            styles — pixel art, neon glow, FUI, glassmorphism, and more. Pay per
-            request with x402 micropayments.
+            Drop your brand name, pick a style, get back a fire SVG icon.
+            8 hand-crafted looks from pixel art to cyberpunk neon. One API
+            call. No accounts, no subscriptions &mdash; just raw icons on demand.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -170,13 +170,13 @@ export default function Home() {
               href="#api"
               className="px-8 py-4 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-500/25 text-lg"
             >
-              Try the API
+              Pimp My Icons
             </a>
             <a
               href="#styles"
               className="px-8 py-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all text-lg"
             >
-              Browse Styles
+              See the Drip
             </a>
           </div>
 
@@ -228,33 +228,33 @@ export default function Home() {
       <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Three Steps to Your Icon
+            Three Steps. Zero Hassle. All Drip.
           </h2>
           <p className="text-gray-500 text-center mb-16 text-lg">
-            No accounts. No waiting. Just icons.
+            No accounts. No sign-ups. No waiting around. Just straight-up icons.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 step: "01",
-                title: "Choose a Style",
+                title: "Pick Your Flavor",
                 description:
-                  "Browse 8 hand-crafted icon styles — from retro pixel art to futuristic HUD interfaces.",
+                  "8 hand-crafted styles waiting for you — pixel art, cyberpunk neon, sci-fi HUDs, and more. Find your vibe.",
                 gradient: "from-brand-500 to-blue-400",
               },
               {
                 step: "02",
-                title: "Describe Your Icon",
+                title: "Tell Us What You Want",
                 description:
-                  "Tell us what you need — a rocket, a shield, a brain. Our AI generates it in your chosen style.",
+                  "A rocket? A skull? A taco? Just say the word. Our AI whips up a custom icon in your chosen style.",
                 gradient: "from-accent-500 to-purple-400",
               },
               {
                 step: "03",
-                title: "Get Your SVG",
+                title: "Grab Your SVG",
                 description:
-                  "Receive a production-ready SVG icon instantly. Scales infinitely, works everywhere.",
+                  "Boom — production-ready SVG, delivered instantly. Scales to infinity. Looks crispy everywhere.",
                 gradient: "from-emerald-500 to-teal-400",
               },
             ].map((item) => (
@@ -281,11 +281,11 @@ export default function Home() {
       <section id="styles" className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            8 Hand-Crafted Styles
+            8 Styles. All Heat.
           </h2>
           <p className="text-gray-500 text-center mb-16 text-lg max-w-2xl mx-auto">
-            Each style has its own personality and system prompt. Pick the vibe
-            that fits your brand.
+            Every style has its own swagger. Pixel art that slaps, neon that
+            glows, glass that shimmers. Pick your weapon.
           </p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -351,11 +351,11 @@ export default function Home() {
       <section id="pricing" className="py-20 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Pay Per Icon. That&apos;s It.
+            No Subscriptions. No BS.
           </h2>
           <p className="text-gray-500 text-center mb-16 text-lg max-w-2xl mx-auto">
-            No subscriptions. No credits to buy. Just pay for each icon with
-            x402 micropayments and get instant access.
+            Pay for what you use. That&apos;s the whole deal. x402 micropayments
+            mean you drop a few cents per icon and keep it moving.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
@@ -374,16 +374,16 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-3">What is x402?</h3>
               <p className="text-gray-500 leading-relaxed mb-4">
-                x402 is an open protocol for HTTP-native micropayments. Instead
-                of API keys and billing, you pay per request with crypto —
-                instantly, programmatically, and without accounts.
+                x402 is the internet&apos;s native payment protocol. No API keys,
+                no billing dashboards, no subscription traps. Just send crypto
+                with your HTTP request and you&apos;re in.
               </p>
               <ul className="space-y-2 text-gray-600">
                 {[
-                  "No signup or API keys required",
-                  "Pay exactly what you use",
-                  "Instant settlement on every request",
-                  "Works with any HTTP client",
+                  "Zero signup — just pay and go",
+                  "Only pay for what you actually use",
+                  "Instant settlement, every single time",
+                  "Works with any HTTP client on earth",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm">
                     <svg
@@ -414,7 +414,7 @@ export default function Home() {
                   <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-3">Simple Flat Pricing</h3>
+              <h3 className="text-xl font-bold mb-3">Straight-Up Pricing</h3>
               <div className="text-center py-6">
                 <div className="text-5xl font-extrabold text-gray-900 mb-1">
                   {LOGO_PRICE}
@@ -423,10 +423,11 @@ export default function Home() {
               </div>
               <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
                 <p className="text-sm font-semibold text-emerald-800">
-                  We pay for your opinion
+                  Talk trash, get cash
                 </p>
                 <p className="text-sm text-emerald-600 mt-1">
-                  Leave a review and get up to 30% back on your spend.
+                  Drop a review and get up to 30% back. We literally pay you to
+                  have opinions.
                 </p>
               </div>
             </div>
@@ -463,11 +464,11 @@ export default function Home() {
               </div>
               <div className="mt-4 p-4 bg-brand-50 rounded-xl border border-brand-200">
                 <p className="text-sm font-semibold text-brand-800">
-                  Save 20% on bulk
+                  Big order energy — save 20%
                 </p>
                 <p className="text-sm text-brand-600 mt-1">
-                  Generate {BATCH_COUNT} variations in one API call. Same
-                  quality, lower price.
+                  {BATCH_COUNT} icons in one API call. Same fire quality, way
+                  less per icon.
                 </p>
               </div>
             </div>
@@ -479,10 +480,10 @@ export default function Home() {
       <section id="api" className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Dead Simple API
+            The API is Stupid Simple
           </h2>
           <p className="text-gray-500 text-center mb-12 text-lg">
-            Four endpoints. Here&apos;s everything you need.
+            Four endpoints. That&apos;s the whole menu. No PhD required.
           </p>
 
           {/* Endpoints summary */}
@@ -491,22 +492,22 @@ export default function Home() {
               {
                 method: "GET",
                 path: "/styles",
-                desc: "List all styles",
+                desc: "Browse the drip",
               },
               {
                 method: "POST",
                 path: "/generate",
-                desc: "Generate an icon",
+                desc: "Mint your icon",
               },
               {
                 method: "GET",
                 path: "/asset/:token",
-                desc: "Re-download SVG",
+                desc: "Grab it again",
               },
               {
                 method: "POST",
                 path: "/rate",
-                desc: "Review & earn reward",
+                desc: "Rate it, get paid",
               },
             ].map((ep) => (
               <div
@@ -567,18 +568,18 @@ export default function Home() {
             </svg>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            We Pay for Your Opinion
+            Get Paid to Have Opinions
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-            Your feedback makes our icons better. Leave a review on any icon you
-            generate and get up to 30% back on your spend. Every review helps us
-            improve — and puts money back in your pocket.
+            We&apos;re not kidding. Rate the icon you just got &mdash; love it
+            or roast it &mdash; and we send up to 30% of your spend right back.
+            Your honesty literally pays.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             {[
-              "Generate an icon",
-              "Leave a review (1-5 stars)",
-              "Get up to 30% back",
+              "Get your icon",
+              "Drop a rating (be honest)",
+              "Collect up to 30% back",
             ].map((step, i) => (
               <div
                 key={step}
@@ -598,20 +599,20 @@ export default function Home() {
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-4xl sm:text-5xl font-extrabold mb-6">
-            Your Next Icon is One
+            Stop Settling for
             <br />
             <span className="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">
-              API Call Away
+              Ugly Icons
             </span>
           </h2>
           <p className="text-gray-500 text-lg mb-10">
-            No signup. No credit card. Just x402 and your creativity.
+            One API call. A few cents. Icons that actually go hard.
           </p>
           <a
             href="#api"
             className="inline-flex px-10 py-5 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-500/25 text-lg"
           >
-            Get Your Icon Now
+            Pimp My Icons Now
           </a>
         </div>
       </section>
@@ -636,7 +637,7 @@ export default function Home() {
             </span>
           </div>
           <p className="text-gray-400 text-sm">
-            Built with x402 protocol. Pay-per-use SVG icon generation.
+            Powered by x402. Icons that go hard, on demand.
           </p>
         </div>
       </footer>
