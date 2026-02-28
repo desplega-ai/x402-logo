@@ -19,6 +19,7 @@ model Style {
 
   rates  Rate[]
   assets Asset[]
+  jobs   GenerationJob[]
 
   @@map("styles")
 }
@@ -45,9 +46,30 @@ model Asset {
   style     Style    @relation(fields: [styleId], references: [id])
   brandName String?  @map("brand_name")
   brandVoice String? @map("brand_voice")
+  jobId     String?  @unique @map("job_id")
+  job       GenerationJob? @relation(fields: [jobId], references: [id])
   createdAt DateTime @default(now()) @db.Timestamptz
   updatedAt DateTime @updatedAt @db.Timestamptz
 
   @@index([styleId])
   @@map("assets")
+}
+
+model GenerationJob {
+  id         String   @id @default(cuid())
+  status     String   @default("pending") // pending, processing, completed, failed
+  styleName  String   @map("style_name")
+  styleId    String   @map("style_id")
+  style      Style    @relation(fields: [styleId], references: [id])
+  brandName  String?  @map("brand_name")
+  brandVoice String?  @map("brand_voice")
+  error      String?  @db.Text
+  retryCount Int      @default(0) @map("retry_count")
+  asset      Asset?
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+
+  @@index([styleId])
+  @@index([status])
+  @@map("generation_jobs")
 }

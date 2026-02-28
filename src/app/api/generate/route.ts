@@ -33,21 +33,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Skip real image generation — store empty SVG placeholder
-    const asset = await prisma.asset.create({
+    // Create a generation job to track the request
+    const job = await prisma.generationJob.create({
       data: {
-        asset: "<svg></svg>",
+        styleName,
         styleId: style.id,
         brandName: brandName ?? null,
         brandVoice: brandVoice ?? null,
+        status: "processing",
       },
     });
 
-    return NextResponse.json({
-      token: asset.token,
-      svg: asset.asset,
-      style: style.name,
-    });
+    try {
+      // Skip real image generation — store empty SVG placeholder
+      const asset = await prisma.asset.create({
+        data: {
+          asset: "<svg></svg>",
+          styleId: style.id,
+          brandName: brandName ?? null,
+          brandVoice: brandVoice ?? null,
+          jobId: job.id,
+        },
+      });
+
+      // Mark job as completed
+      await prisma.generationJob.update({
+        where: { id: job.id },
+        data: { status: "completed" },
+      });
+
+      return NextResponse.json({
+        token: asset.token,
+        svg: asset.asset,
+        style: style.name,
+      });
+    } catch (genError) {
+      // Mark job as failed if asset creation fails
+      await prisma.generationJob.update({
+        where: { id: job.id },
+        data: {
+          status: "failed",
+          error: genError instanceof Error ? genError.message : "Unknown error",
+          retryCount: { increment: 1 },
+        },
+      });
+      throw genError;
+    }
   } catch (error) {
     console.error("Error generating asset:", error);
     return NextResponse.json(
