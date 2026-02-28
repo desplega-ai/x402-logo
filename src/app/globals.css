@@ -911,13 +911,9 @@ body {
   .hero-subtitle {
     font-size: 12px;
   }
-  .hero-actions {
-    flex-direction: column;
-    width: 100%;
-  }
   .btn-primary,
   .btn-secondary {
-    width: 100%;
+    padding: 14px 28px;
     text-align: center;
   }
   .pricing-outer .section-title {
