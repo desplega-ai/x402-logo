@@ -159,9 +159,9 @@ export default function Home() {
       </div>
 
       {/* ── API SECTION ────────────────────────────── */}
-      <section id="api" style={{ background: "var(--offblack)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "100px 48px" }}>
+      <section id="api" className="api-outer" style={{ background: "var(--offblack)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "100px 48px" }}>
         <div className="api-section">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
+          <div className="api-grid">
             <div>
               <div className="section-kicker">Simple Integration</div>
               <h2 className="section-title">One request.<br />Any icon.</h2>
@@ -245,7 +245,7 @@ export default function Home() {
       </div>
 
       {/* ── PRICING ────────────────────────────────── */}
-      <section id="pricing" style={{ padding: "100px 48px", textAlign: "center" }}>
+      <section id="pricing" className="pricing-outer" style={{ padding: "100px 48px", textAlign: "center" }}>
         <div className="section-kicker">pay-per-svg</div>
         <h2 className="section-title" style={{ fontSize: 64, marginBottom: 8 }}>
           $0.10<span style={{ fontWeight: 400, fontSize: 24, opacity: 0.5 }}> / image</span>

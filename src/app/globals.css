@@ -782,6 +782,14 @@ body {
   transform: scale(1.25);
 }
 
+/* ── API SECTION GRID (refactored for responsive) ── */
+.api-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
 /* ── RESPONSIVE ──────────────────────────────── */
 @media (max-width: 768px) {
   .omg-nav {
@@ -793,20 +801,60 @@ body {
   .nav-cta {
     display: none;
   }
+  .color-switcher {
+    display: none;
+  }
   .hero {
     padding: 120px 20px 60px;
   }
   .hero-stat-row {
-    gap: 24px;
+    gap: 16px;
     flex-wrap: wrap;
+  }
+  .stat-divider {
+    display: none;
+  }
+  .hero-stat {
+    min-width: 80px;
+  }
+  .hero-stat-num {
+    font-size: 22px;
+  }
+
+  /* API section */
+  .api-outer {
+    padding: 60px 20px !important;
+  }
+  .api-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .code-body {
+    padding: 16px;
+    font-size: 11px;
+  }
+
+  /* Pricing */
+  .pricing-outer {
+    padding: 60px 20px !important;
+  }
+  .pricing-outer .section-title {
+    font-size: 48px !important;
   }
   .pricing-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
+
+  /* Studio */
   .studio-section {
-    padding: 60px 16px 100px;
+    padding: 60px 16px 60px;
   }
+  .studio-embed {
+    border-radius: 12px;
+  }
+
+  /* Footer */
   .omg-footer {
     flex-direction: column;
     gap: 24px;
@@ -817,6 +865,11 @@ body {
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
+  }
+
+  /* Docs */
+  .docs-nav {
+    padding: 16px 20px;
   }
   .docs-layout {
     flex-direction: column;
@@ -834,6 +887,41 @@ body {
   }
   .docs-content {
     padding: 32px 20px;
+  }
+  .doc-section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .doc-table {
+    min-width: 480px;
+  }
+  .endpoint-url code {
+    font-size: 12px;
+    word-break: break-all;
+  }
+  .code-block-content code {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 28px;
+  }
+  .hero-subtitle {
+    font-size: 12px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+  .pricing-outer .section-title {
+    font-size: 36px !important;
   }
 }
 
