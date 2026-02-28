@@ -1,0 +1,472 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+
+/* ── Ghost SVG Styles ─────────────────────────────── */
+const STYLES = [
+  {
+    id: "classic",
+    name: "Classic",
+    desc: "The original ghost silhouette",
+    render: ({ fill, stroke, bg, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 20 C55 20 30 55 30 95 L30 185 L50 165 L70 185 L90 165 L110 185 L130 165 L150 185 L170 165 L170 95 C170 55 145 20 100 20Z" fill={fill} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="80" cy="95" rx="14" ry="17" fill={bg} />
+        <ellipse cx="120" cy="95" rx="14" ry="17" fill={bg} />
+      </svg>
+    ),
+  },
+  {
+    id: "rounded",
+    name: "Chubby",
+    desc: "Extra soft and round",
+    render: ({ fill, stroke, bg, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 230" fill="none">
+        <path d="M100 18 C48 18 25 60 25 100 L25 192 Q25 200 33 196 L48 188 Q56 183 64 188 L80 197 Q88 202 96 197 L104 192 Q112 187 120 192 L136 201 Q144 206 152 201 L167 192 Q175 187 175 192 L175 100 C175 60 152 18 100 18Z" fill={fill} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="80" cy="100" rx="16" ry="19" fill={bg} />
+        <ellipse cx="120" cy="100" rx="16" ry="19" fill={bg} />
+      </svg>
+    ),
+  },
+  {
+    id: "outline",
+    name: "Outline",
+    desc: "Clean line art ghost",
+    render: ({ fill, stroke, bg, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 220" fill="none">
+        <path d="M100 22 C56 22 32 58 32 97 L32 183 L52 163 L72 183 L92 163 L112 183 L132 163 L152 183 L168 163 L168 97 C168 58 144 22 100 22Z" fill="none" stroke={fill} strokeWidth={Math.max(sw, 5)} strokeLinejoin="round" strokeLinecap="round" />
+        <ellipse cx="80" cy="96" rx="13" ry="16" fill={fill} />
+        <ellipse cx="120" cy="96" rx="13" ry="16" fill={fill} />
+        <ellipse cx="78" cy="93" rx="4" ry="5" fill={bg === "#ffffff" ? "#fff" : bg} />
+        <ellipse cx="118" cy="93" rx="4" ry="5" fill={bg === "#ffffff" ? "#fff" : bg} />
+      </svg>
+    ),
+  },
+  {
+    id: "pixel",
+    name: "Pixel",
+    desc: "8-bit retro ghost",
+    render: ({ fill, bg }: GhostProps) => {
+      const S = 18;
+      const grid = [
+        [0, 0, 1, 1, 1, 1, 1, 1, 0, 0], [0, 1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 0, 0, 1, 1, 0, 0, 1, 1], [1, 1, 0, 0, 1, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 0, 1, 1], [1, 0, 0, 1, 1, 1, 1, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 0, 1], [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+      ];
+      const eyeCells: [number, number][] = [[2, 3], [3, 3], [2, 4], [3, 4], [6, 3], [7, 3], [6, 4], [7, 4]];
+      return (
+        <svg viewBox={`0 0 ${10 * S} ${12 * S}`} fill="none" shapeRendering="crispEdges">
+          {grid.flatMap((row, r) => row.map((cell, c) => cell ? <rect key={`${r}-${c}`} x={c * S} y={r * S} width={S} height={S} fill={fill} /> : null))}
+          {eyeCells.map(([c, r]) => <rect key={`e${c}${r}`} x={c * S} y={r * S} width={S} height={S} fill={bg} />)}
+        </svg>
+      );
+    },
+  },
+  {
+    id: "sharp",
+    name: "Sharp",
+    desc: "Angular, geometric ghost",
+    render: ({ fill, stroke, bg, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 220" fill="none">
+        <path d="M100 20 L40 65 L35 185 L55 160 L75 185 L100 160 L125 185 L145 160 L165 185 L165 65 Z" fill={fill} stroke={stroke} strokeWidth={sw} strokeLinejoin="miter" />
+        <polygon points="75,80 88,115 62,115" fill={bg} />
+        <polygon points="125,80 138,115 112,115" fill={bg} />
+      </svg>
+    ),
+  },
+  {
+    id: "drip",
+    name: "Drip",
+    desc: "Melting ghost vibes",
+    render: ({ fill, stroke, bg, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 240" fill="none">
+        <path d="M100 18 C55 18 28 58 28 98 L28 170 Q30 180 38 178 Q46 175 48 185 Q50 195 58 193 Q66 190 68 200 Q70 210 78 207 L90 200 Q98 196 106 200 L118 207 Q126 210 128 200 Q130 190 138 193 Q146 195 148 185 Q150 175 158 178 Q166 180 168 170 L172 98 C172 58 145 18 100 18Z" fill={fill} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="82" cy="97" rx="14" ry="17" fill={bg} />
+        <ellipse cx="118" cy="97" rx="14" ry="17" fill={bg} />
+      </svg>
+    ),
+  },
+  {
+    id: "minimal",
+    name: "Minimal",
+    desc: "Ultra simplified ghost",
+    render: ({ fill, stroke, bg, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 210" fill="none">
+        <path d="M100 30 C62 30 42 62 42 92 L42 175 Q57 155 72 175 Q87 155 100 175 Q113 155 128 175 Q143 155 158 175 L158 92 C158 62 138 30 100 30Z" fill={fill} stroke={stroke} strokeWidth={sw} />
+        <circle cx="82" cy="90" r="11" fill={bg} />
+        <circle cx="118" cy="90" r="11" fill={bg} />
+      </svg>
+    ),
+  },
+  {
+    id: "haunted",
+    name: "Haunted",
+    desc: "Scary ghost with expression",
+    render: ({ fill, stroke, bg, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 230" fill="none">
+        <path d="M100 15 C50 15 25 58 25 100 L25 190 L45 168 L65 190 L85 168 L100 182 L115 168 L135 190 L155 168 L175 190 L175 100 C175 58 150 15 100 15Z" fill={fill} stroke={stroke} strokeWidth={sw} />
+        <line x1="62" y1="78" x2="88" y2="88" stroke={bg} strokeWidth="5" strokeLinecap="round" />
+        <line x1="138" y1="78" x2="112" y2="88" stroke={bg} strokeWidth="5" strokeLinecap="round" />
+        <ellipse cx="80" cy="100" rx="13" ry="16" fill={bg} />
+        <ellipse cx="120" cy="100" rx="13" ry="16" fill={bg} />
+        <path d="M78 130 Q90 145 100 138 Q110 145 122 130" stroke={bg} strokeWidth="4" strokeLinecap="round" fill="none" />
+      </svg>
+    ),
+  },
+  {
+    id: "dot",
+    name: "Dot",
+    desc: "Halftone dot matrix ghost",
+    render: ({ fill, bg }: GhostProps) => {
+      const R = 5.2, G = 13;
+      const mask = [
+        [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1, 1], [1, 1, 1, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ];
+      return (
+        <svg viewBox={`0 0 ${14 * G} ${16 * G}`} fill="none">
+          {mask.flatMap((row, r) => row.map((cell, c) => {
+            if (cell === 0) return null;
+            return <circle key={`${r}-${c}`} cx={c * G + G / 2} cy={r * G + G / 2} r={R} fill={cell === 2 ? bg : fill} />;
+          }))}
+        </svg>
+      );
+    },
+  },
+  {
+    id: "pencil",
+    name: "Pencil",
+    desc: "Single continuous line drawing",
+    render: ({ fill, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 220" fill="none">
+        <path d="M100 22 C100 22 138 24 158 52 C174 74 172 100 172 118 L172 175 C172 178 168 176 165 172 C160 165 156 160 152 168 C148 176 145 180 140 174 C135 168 130 163 125 170 C120 177 115 180 110 175 C105 170 100 167 95 172 C90 177 86 178 82 173 C78 168 73 163 68 170 C63 177 58 176 56 172 C53 168 50 165 48 168 C44 171 40 176 36 172 L28 165 L28 118 C28 100 28 74 44 52 C60 28 100 22 100 22Z" fill="none" stroke={fill} strokeWidth={Math.max(sw, 1.8)} strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="80" cy="95" r="14" fill="none" stroke={fill} strokeWidth={Math.max(sw, 1.8)} />
+        <circle cx="120" cy="95" r="14" fill="none" stroke={fill} strokeWidth={Math.max(sw, 1.8)} />
+        <circle cx="80" cy="95" r="8" fill="none" stroke={fill} strokeWidth="1" opacity="0.5" />
+        <circle cx="120" cy="95" r="8" fill="none" stroke={fill} strokeWidth="1" opacity="0.5" />
+        <path d="M28 168 C24 172 20 178 24 183 C28 188 34 184 32 178" fill="none" stroke={fill} strokeWidth={Math.max(sw, 1.8)} strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: "wiggly",
+    name: "Wiggly",
+    desc: "Wobbly cartoon ghost",
+    render: ({ fill, stroke, bg, sw }: GhostProps) => (
+      <svg viewBox="0 0 200 230" fill="none">
+        <path d="M100 22 C58 22 30 60 30 100 C30 110 32 120 30 130 C28 140 32 150 30 160 C28 170 36 175 44 168 C52 161 56 172 64 178 C72 184 80 174 88 178 C96 182 104 180 112 176 C120 172 128 182 136 176 C144 170 150 160 158 168 C166 176 172 170 170 160 C168 150 172 140 170 130 C168 120 170 110 170 100 C170 60 142 22 100 22Z" fill={fill} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="80" cy="97" rx="13" ry="15" fill={bg} />
+        <ellipse cx="120" cy="97" rx="13" ry="15" fill={bg} />
+      </svg>
+    ),
+  },
+];
+
+interface GhostProps {
+  fill: string;
+  stroke: string;
+  bg: string;
+  sw: number;
+}
+
+const PRESETS = [
+  "#000000", "#ffffff", "#FF5733", "#FFD700", "#4FAAFF",
+  "#6B5CE7", "#00C48C", "#FF69B4", "#FF8C00", "#e8ff4f",
+  "#7CFC00", "#DC143C", "#8B4513", "#708090", "#00e5a0",
+];
+
+/* ── Hex Color Picker ─────────────────────────────── */
+function HexColorPicker({ color, onChange, size = 200 }: { color: string; onChange: (c: string) => void; size?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dragging = useRef(false);
+  const brightnessVal = useRef(1);
+  const [brightness, setBrightness] = useState(1);
+
+  const drawWheel = useCallback((ctx: CanvasRenderingContext2D, brt: number) => {
+    const cx = size / 2, cy = size / 2, r = size / 2 - 4;
+    ctx.clearRect(0, 0, size, size);
+    for (let angle = 0; angle < 360; angle++) {
+      const start = (angle - 1) * Math.PI / 180;
+      const end = (angle + 1) * Math.PI / 180;
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      grad.addColorStop(0, `hsla(${angle},0%,${brt * 100}%,1)`);
+      grad.addColorStop(1, `hsla(${angle},100%,${brt * 50}%,1)`);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, start, end);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,255,255,0.15)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }, [size]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    drawWheel(canvas.getContext("2d")!, brightnessVal.current);
+  }, [drawWheel]);
+
+  const pickColor = useCallback((e: React.MouseEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = size / rect.width, scaleY = size / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    const cx = size / 2, cy = size / 2;
+    const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+    if (dist > size / 2 - 2) return;
+    const pixel = canvas.getContext("2d")!.getImageData(Math.round(x), Math.round(y), 1, 1).data;
+    onChange("#" + [pixel[0], pixel[1], pixel[2]].map(v => v.toString(16).padStart(2, "0")).join(""));
+  }, [size, onChange]);
+
+  const hexToHSL = (hex: string): [number, number] => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255, g = parseInt(hex.slice(3, 5), 16) / 255, b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+      else if (max === g) h = ((b - r) / d + 2) / 6;
+      else h = ((r - g) / d + 4) / 6;
+    }
+    return [h * 360, s];
+  };
+
+  const [h, s] = hexToHSL(color.length === 7 ? color : "#888888");
+  const rad = (size / 2 - 4) * s;
+  const mx = size / 2 + rad * Math.cos(h * Math.PI / 180);
+  const my = size / 2 + rad * Math.sin(h * Math.PI / 180);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+      <div
+        style={{ position: "relative", width: size, height: size, cursor: "crosshair" }}
+        onMouseDown={e => { dragging.current = true; pickColor(e); }}
+        onMouseMove={e => { if (dragging.current) pickColor(e); }}
+        onMouseUp={() => dragging.current = false}
+        onMouseLeave={() => dragging.current = false}
+      >
+        <canvas ref={canvasRef} width={size} height={size} style={{ borderRadius: "50%", display: "block", width: size, height: size }} />
+        <div style={{ position: "absolute", left: mx - 8, top: my - 8, width: 16, height: 16, borderRadius: "50%", border: "2.5px solid #fff", boxShadow: "0 0 0 1.5px rgba(0,0,0,0.4)", background: color, pointerEvents: "none" }} />
+      </div>
+      <div style={{ width: "100%", padding: "0 4px" }}>
+        <div style={{ fontSize: 9, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 5, fontFamily: "'Inter',sans-serif" }}>BRIGHTNESS</div>
+        <div style={{ position: "relative", height: 18 }}>
+          <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", width: "100%", height: 7, borderRadius: 4, background: `linear-gradient(to right, #000, ${color})` }} />
+          <input
+            type="range" min="0.1" max="1" step="0.01" value={brightness}
+            onChange={e => {
+              const val = parseFloat(e.target.value);
+              setBrightness(val);
+              brightnessVal.current = val;
+              const canvas = canvasRef.current;
+              if (canvas) drawWheel(canvas.getContext("2d")!, val);
+            }}
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Ghost Studio App ─────────────────────────────── */
+export default function GhostStudio() {
+  const [styleIdx, setStyleIdx] = useState(0);
+  const [ghostColor, setGhostColor] = useState("#e8ff4f");
+  const [eyeColor, setEyeColor] = useState("#080808");
+  const [bgColor, setBgColor] = useState("#0e0e0e");
+  const [activeTarget, setActiveTarget] = useState<"ghost" | "eye" | "bg">("ghost");
+  const [strokeWidth, setStrokeWidth] = useState(0);
+
+  const activeStyle = STYLES[styleIdx];
+  const targetColors = { ghost: ghostColor, eye: eyeColor, bg: bgColor };
+  const setTargetColor = { ghost: setGhostColor, eye: setEyeColor, bg: setBgColor };
+  const activeColor = targetColors[activeTarget];
+  const setActiveColor = (c: string) => setTargetColor[activeTarget](c);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") setStyleIdx(i => (i - 1 + STYLES.length) % STYLES.length);
+      if (e.key === "ArrowRight") setStyleIdx(i => (i + 1) % STYLES.length);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  const ghostProps: GhostProps = { fill: ghostColor, stroke: strokeWidth > 0 ? "#000000" : "none", bg: eyeColor, sw: strokeWidth };
+
+  const labelStyle: React.CSSProperties = { fontFamily: "'Inter', sans-serif", fontSize: 9, color: "#555", letterSpacing: "0.14em", textTransform: "uppercase" };
+
+  return (
+    <div style={{ height: 600, background: "#0e0e0e", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .gs-arrow-btn { width:36px; height:36px; border-radius:50%; border:1.5px solid #333; background:transparent; color:#888; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:all 0.18s; }
+        .gs-arrow-btn:hover { border-color:#fff; color:#fff; }
+        .gs-swatch { width:22px; height:22px; border-radius:5px; cursor:pointer; flex-shrink:0; transition:transform 0.15s; }
+        .gs-swatch:hover { transform:scale(1.2); }
+        .gs-target-btn { padding:6px 10px; border-radius:5px; border:1.5px solid transparent; cursor:pointer; font-family:'Inter', sans-serif; font-size:10px; font-weight:700; letter-spacing:0.06em; transition:all 0.18s; flex:1; background:transparent; color:#666; }
+        .gs-target-btn.active { border-color:#fff; background:rgba(255,255,255,0.08); color:#fff; }
+        .gs-target-btn:not(.active) { border-color:#2a2a2a; }
+        .gs-style-dot { width:7px; height:7px; border-radius:50%; background:#333; cursor:pointer; transition:all 0.2s; flex-shrink:0; }
+        .gs-style-dot.active { background:#fff; transform:scale(1.4); }
+        .gs-style-row { border-radius:10px; overflow:hidden; cursor:pointer; border:1.5px solid; transition:all 0.18s; padding:10px 8px; display:flex; align-items:center; gap:10px; }
+        @keyframes ghostIn { from { opacity:0; transform:scale(0.88) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+        .ghost-anim { animation:ghostIn 0.28s cubic-bezier(0.34,1.56,0.64,1); }
+        .gs-panel input[type=range] { -webkit-appearance:none; appearance:none; background:transparent; }
+        .gs-panel input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#fff; cursor:pointer; border:2px solid #333; }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ padding: "14px 24px", borderBottom: "1px solid #1e1e1e", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#0a0a0a" }}>
+        <div>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: "#fff", letterSpacing: "0.12em" }}>GHOST STUDIO</span>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: "#555", marginLeft: 16, letterSpacing: "0.08em" }}>&larr; &rarr; to cycle &middot; {STYLES.length} styles</span>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#00e5a0", boxShadow: "0 0 8px #00e5a0" }} />
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: "#555", letterSpacing: "0.08em" }}>LIVE PREVIEW</span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="gs-panel" style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+        {/* Left Controls */}
+        <div style={{ width: 250, borderRight: "1px solid #1a1a1a", display: "flex", flexDirection: "column", overflowY: "auto", background: "#0c0c0c" }}>
+          {/* Style selector */}
+          <div style={{ padding: "16px 16px 14px", borderBottom: "1px solid #1a1a1a" }}>
+            <p style={{ ...labelStyle, marginBottom: 12 }}>STYLE &mdash; {styleIdx + 1}/{STYLES.length}</p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <button className="gs-arrow-btn" onClick={() => setStyleIdx(i => (i - 1 + STYLES.length) % STYLES.length)}>&lsaquo;</button>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: "#fff", letterSpacing: "0.04em" }}>{activeStyle.name}</p>
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: "#666", marginTop: 2 }}>{activeStyle.desc}</p>
+              </div>
+              <button className="gs-arrow-btn" onClick={() => setStyleIdx(i => (i + 1) % STYLES.length)}>&rsaquo;</button>
+            </div>
+            <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+              {STYLES.map((s, i) => (
+                <div key={s.id} className={`gs-style-dot${i === styleIdx ? " active" : ""}`} onClick={() => setStyleIdx(i)} title={s.name} />
+              ))}
+            </div>
+          </div>
+
+          {/* Color target */}
+          <div style={{ padding: "14px 16px", borderBottom: "1px solid #1a1a1a" }}>
+            <p style={{ ...labelStyle, marginBottom: 10 }}>EDIT COLOR</p>
+            <div style={{ display: "flex", gap: 6 }}>
+              {([
+                { id: "ghost" as const, label: "GHOST", color: ghostColor },
+                { id: "eye" as const, label: "EYES", color: eyeColor },
+                { id: "bg" as const, label: "BG", color: bgColor },
+              ]).map(t => (
+                <button key={t.id} className={`gs-target-btn${activeTarget === t.id ? " active" : ""}`} onClick={() => setActiveTarget(t.id)}>
+                  <div style={{ width: 8, height: 8, borderRadius: 2, background: t.color, margin: "0 auto 4px", border: "1px solid rgba(255,255,255,0.1)" }} />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Color wheel */}
+          <div style={{ padding: "14px 16px", borderBottom: "1px solid #1a1a1a" }}>
+            <HexColorPicker color={activeColor.length === 7 ? activeColor : "#888888"} onChange={setActiveColor} size={216} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
+              <div style={{ width: 24, height: 24, borderRadius: 5, background: activeColor, border: "1px solid #333", flexShrink: 0 }} />
+              <input
+                value={activeColor}
+                onChange={e => { const v = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(v)) setActiveColor(v); }}
+                style={{ flex: 1, background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#fff", padding: "6px 10px", fontSize: 12, letterSpacing: "0.08em", outline: "none", borderRadius: 5, fontFamily: "'Inter', sans-serif" }}
+              />
+            </div>
+          </div>
+
+          {/* Presets */}
+          <div style={{ padding: "12px 16px", borderBottom: "1px solid #1a1a1a" }}>
+            <p style={{ ...labelStyle, marginBottom: 8 }}>PRESETS</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {PRESETS.map(p => (
+                <div
+                  key={p} className="gs-swatch"
+                  style={{ background: p, border: p === activeColor ? "2px solid #fff" : "2px solid #2a2a2a", width: 22, height: 22, borderRadius: 5 }}
+                  onClick={() => setActiveColor(p)} title={p}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Stroke */}
+          <div style={{ padding: "12px 16px" }}>
+            <p style={{ ...labelStyle, marginBottom: 10 }}>STROKE</p>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                <span style={{ fontSize: 9, color: "#888", fontFamily: "'Inter', sans-serif" }}>Width</span>
+                <span style={{ fontSize: 9, color: "#fff", fontFamily: "'Inter', sans-serif" }}>{strokeWidth}px</span>
+              </div>
+              <input type="range" min="0" max="12" step="0.5" value={strokeWidth} onChange={e => setStrokeWidth(parseFloat(e.target.value))} style={{ width: "100%", accentColor: "#fff" }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Center Preview */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: bgColor, position: "relative", transition: "background 0.3s" }}>
+          <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(rgba(0,0,0,0.6) 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
+          <div key={styleIdx} className="ghost-anim" style={{ width: 230, height: 230, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {activeStyle.render(ghostProps)}
+          </div>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: "rgba(255,255,255,0.15)", letterSpacing: "0.16em", textTransform: "uppercase" as const, marginTop: 16 }}>
+            {activeStyle.name} &middot; {activeStyle.desc}
+          </p>
+          <div style={{ position: "absolute", bottom: 20, display: "flex", gap: 12, alignItems: "center" }}>
+            <button className="gs-arrow-btn" style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.25)" }} onClick={() => setStyleIdx(i => (i - 1 + STYLES.length) % STYLES.length)}>&lsaquo;</button>
+            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", fontFamily: "'Inter', sans-serif" }}>
+              {styleIdx + 1} / {STYLES.length}
+            </span>
+            <button className="gs-arrow-btn" style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.25)" }} onClick={() => setStyleIdx(i => (i + 1) % STYLES.length)}>&rsaquo;</button>
+          </div>
+        </div>
+
+        {/* Right: All Styles */}
+        <div style={{ width: 190, borderLeft: "1px solid #1a1a1a", background: "#0c0c0c", overflowY: "auto" }}>
+          <div style={{ padding: "16px 12px 10px", borderBottom: "1px solid #1a1a1a" }}>
+            <p style={{ ...labelStyle }}>ALL STYLES</p>
+          </div>
+          <div style={{ padding: "10px", display: "flex", flexDirection: "column", gap: 6 }}>
+            {STYLES.map((s, i) => (
+              <div
+                key={s.id} className="gs-style-row" onClick={() => setStyleIdx(i)}
+                style={{
+                  borderColor: i === styleIdx ? "rgba(232,255,79,0.4)" : "rgba(255,255,255,0.04)",
+                  background: i === styleIdx ? "rgba(232,255,79,0.05)" : "rgba(255,255,255,0.02)",
+                }}
+              >
+                <div style={{ width: 38, height: 38, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {s.render({ fill: i === styleIdx ? ghostColor : "#555", stroke: "none", bg: i === styleIdx ? eyeColor : "#0c0c0c", sw: 0 })}
+                </div>
+                <div>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: i === styleIdx ? "#e8ff4f" : "#555", letterSpacing: "0.06em" }}>{s.name}</p>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, color: "#3a3a3a", marginTop: 2 }}>{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
