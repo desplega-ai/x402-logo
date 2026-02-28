@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withX402 } from "@x402/next";
 import { prisma } from "@/lib/prisma";
+import { x402Server, evmAddress, x402Network } from "@/lib/x402";
 import { start } from "workflow/api";
 import { generateSvgWorkflow } from "@/workflows/generate-svg";
 import { z } from "zod/v4";
@@ -10,7 +12,7 @@ const generateSchema = z.object({
   brandVoice: z.string().max(500).optional(),
 });
 
-export async function POST(request: NextRequest) {
+const handler = async (request: NextRequest): Promise<NextResponse> => {
   try {
     const body = await request.json();
     const parsed = generateSchema.safeParse(body);
@@ -82,4 +84,21 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+};
+
+export const POST = withX402(
+  handler,
+  {
+    accepts: [
+      {
+        scheme: "exact",
+        price: "$0.10",
+        network: x402Network,
+        payTo: evmAddress,
+      },
+    ],
+    description: "Generate a custom SVG icon in your chosen style",
+    mimeType: "application/json",
+  },
+  x402Server,
+);
