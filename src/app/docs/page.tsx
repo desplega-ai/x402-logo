@@ -14,6 +14,13 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "rate", label: "Rate" },
 ];
 
+const BASE_URL =
+  typeof window !== "undefined"
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_VERCEL_URL
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      : "https://omghost.xyz";
+
 function CodeBlock({ children, title }: { children: string; title?: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -49,73 +56,179 @@ function OverviewSection() {
       </p>
 
       <h3>Base URL</h3>
-      <CodeBlock>{`https://omghost.xyz`}</CodeBlock>
+      <CodeBlock>{BASE_URL}</CodeBlock>
+      <p className="muted">
+        All API endpoints below are relative to this base URL. Example:{" "}
+        <code>{BASE_URL}/api/styles</code>
+      </p>
+
+      <h3>Content Type</h3>
+      <p>
+        All <code>POST</code> requests must include{" "}
+        <code>Content-Type: application/json</code>. All responses are JSON.
+      </p>
 
       <h3>How It Works</h3>
       <ol>
         <li>
-          <strong>Browse styles</strong> — Call{" "}
-          <code>GET /api/styles</code> to see the available ghost styles.
+          <strong>Browse styles</strong> — <code>GET /api/styles</code> returns
+          all available ghost styles.
         </li>
         <li>
-          <strong>Generate an icon</strong> — Call{" "}
-          <code>POST /api/generate</code> with your chosen style (and optional
-          brand context). You get back a <code>jobId</code>.
+          <strong>Generate an icon</strong> —{" "}
+          <code>POST /api/generate</code> starts an async job. Requires{" "}
+          <a href="https://x402.org" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>
+            x402
+          </a>{" "}
+          payment ($0.10). Returns a <code>jobId</code>.
         </li>
         <li>
-          <strong>Poll for completion</strong> — Call{" "}
-          <code>GET /api/generate/[jobId]/status</code> until the status is{" "}
-          <code>&quot;completed&quot;</code>. The response includes an access{" "}
-          <code>token</code> and the generated <code>svg</code>.
+          <strong>Poll for completion</strong> —{" "}
+          <code>GET /api/generate/[jobId]/status</code> until status is{" "}
+          <code>&quot;completed&quot;</code>. Response includes the{" "}
+          <code>svg</code> and a permanent access <code>token</code>.
         </li>
         <li>
-          <strong>Retrieve later</strong> — Use{" "}
-          <code>GET /api/asset/[token]</code> to fetch the SVG again at any
-          time.
+          <strong>Retrieve later</strong> —{" "}
+          <code>GET /api/asset/[token]</code> fetches the SVG at any time.
         </li>
         <li>
-          <strong>Rate the result</strong> — Optionally call{" "}
-          <code>POST /api/rate</code> to leave feedback.
+          <strong>Rate the result</strong> — Optionally{" "}
+          <code>POST /api/rate</code> to submit feedback.
         </li>
       </ol>
 
       <h3>Pricing</h3>
       <p>
-        <strong>$0.10 per image (SVG &amp; PNG).</strong> Payment is handled via the x402
-        micropayment protocol — your HTTP client pays automatically per request.
-        No API keys, no subscriptions.
+        <strong>$0.10 per image</strong> (SVG &amp; PNG). Payment is handled via
+        the x402 micropayment protocol — no API keys, no accounts, no
+        subscriptions. Only <code>POST /api/generate</code> requires payment.
+        All other endpoints are free.
       </p>
 
-      <h3>Quick Example</h3>
-      <CodeBlock title="Generate a ghost icon (full flow)">{`# 1. Generate
-RESPONSE=$(curl -s -X POST https://omghost.xyz/api/generate \\
+      <h3>x402 Payment Protocol</h3>
+      <p>
+        The <code>/api/generate</code> endpoint uses the{" "}
+        <a href="https://x402.org" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>
+          x402 micropayment protocol
+        </a>{" "}
+        for payment. Here&apos;s how it works:
+      </p>
+      <ol>
+        <li>
+          <strong>Call the endpoint</strong> — Send your <code>POST</code>{" "}
+          request normally with your JSON body.
+        </li>
+        <li>
+          <strong>Receive a 402</strong> — The server responds with HTTP{" "}
+          <code>402 Payment Required</code> and a JSON body describing accepted
+          payment methods (network, price, recipient address).
+        </li>
+        <li>
+          <strong>Make the payment</strong> — Transfer the exact amount on the
+          specified EVM network to the <code>payTo</code> address.
+        </li>
+        <li>
+          <strong>Retry with proof</strong> — Re-send the same request with an{" "}
+          <code>X-PAYMENT</code> header containing the base64-encoded payment
+          receipt.
+        </li>
+        <li>
+          <strong>Receive the response</strong> — The server verifies payment
+          via the x402 facilitator and processes your request.
+        </li>
+      </ol>
+
+      <CodeBlock title="402 response body">{`{
+  "accepts": [
+    {
+      "scheme": "exact",
+      "price": "$0.10",
+      "network": "eip155:84532",
+      "payTo": "0x..."
+    }
+  ],
+  "description": "Generate a custom SVG icon in your chosen style",
+  "mimeType": "application/json"
+}`}</CodeBlock>
+
+      <h4>Using an x402 client library (recommended)</h4>
+      <p>
+        The easiest approach is to use an x402 client library that handles the
+        402 → payment → retry flow automatically:
+      </p>
+      <CodeBlock title="JavaScript (@x402/client)">{`import { withX402Payment } from "@x402/client";
+
+// Wrap fetch with x402 payment handling
+const x402Fetch = withX402Payment(fetch, { wallet });
+
+// Use it exactly like regular fetch — payment happens automatically
+const res = await x402Fetch("${BASE_URL}/api/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ styleName: "classic" }),
+});
+
+const { jobId } = await res.json();`}</CodeBlock>
+
+      <h4>Manual x402 flow (for agents without a library)</h4>
+      <CodeBlock title="Step-by-step manual flow">{`# 1. Send the request — you'll get a 402
+curl -s -w "\\nHTTP_STATUS:%{http_code}" \\
+  -X POST ${BASE_URL}/api/generate \\
+  -H "Content-Type: application/json" \\
+  -d '{"styleName": "classic"}'
+# → HTTP 402 with payment instructions in body
+
+# 2. Parse the 402 body to get: scheme, price, network, payTo
+# 3. Make an EVM payment for $0.10 to the payTo address on the specified network
+# 4. Retry with the X-PAYMENT header containing base64-encoded payment proof:
+
+curl -X POST ${BASE_URL}/api/generate \\
+  -H "Content-Type: application/json" \\
+  -H "X-PAYMENT: <base64-encoded-payment-receipt>" \\
+  -d '{"styleName": "classic"}'
+# → HTTP 200 with { jobId, runId, status: "pending" }`}</CodeBlock>
+
+      <h3>Quick Example (full flow)</h3>
+      <CodeBlock title="Generate a ghost icon end-to-end">{`# Assumes x402 payment is handled by your client
+
+# 1. List available styles
+curl -s ${BASE_URL}/api/styles | jq '.styles[].name'
+
+# 2. Generate an icon
+RESPONSE=$(curl -s -X POST ${BASE_URL}/api/generate \\
   -H "Content-Type: application/json" \\
   -d '{"styleName": "classic", "brandName": "Acme Corp"}')
-
 JOB_ID=$(echo $RESPONSE | jq -r '.jobId')
-echo "Job started: $JOB_ID"
 
-# 2. Poll until complete
+# 3. Poll until complete (typically 5-15 seconds)
 while true; do
-  STATUS=$(curl -s "https://omghost.xyz/api/generate/$JOB_ID/status")
+  STATUS=$(curl -s "${BASE_URL}/api/generate/$JOB_ID/status")
   STATE=$(echo $STATUS | jq -r '.status')
 
   if [ "$STATE" = "completed" ]; then
     TOKEN=$(echo $STATUS | jq -r '.token')
-    SVG=$(echo $STATUS | jq -r '.svg')
+    echo "$STATUS" | jq -r '.svg' > ghost.svg
     echo "Done! Token: $TOKEN"
-    echo "$SVG" > ghost.svg
     break
   elif [ "$STATE" = "failed" ]; then
     echo "Failed: $(echo $STATUS | jq -r '.error')"
     exit 1
   fi
-
   sleep 2
 done
 
-# 3. Retrieve the asset later
-curl -s "https://omghost.xyz/api/asset/$TOKEN" | jq .`}</CodeBlock>
+# 4. Retrieve the asset later by token
+curl -s "${BASE_URL}/api/asset/$TOKEN" | jq .
+
+# 5. Rate the result (optional)
+curl -s -X POST ${BASE_URL}/api/rate \\
+  -H "Content-Type: application/json" \\
+  -d "{
+    \\"token\\": \\"$TOKEN\\",
+    \\"rating\\": 5,
+    \\"styleName\\": \\"classic\\"
+  }"`}</CodeBlock>
     </div>
   );
 }
@@ -132,7 +245,10 @@ function StylesSection() {
         <code>GET /api/styles</code>
       </div>
 
-      <p>Returns all available ghost icon styles with their descriptions.</p>
+      <p>
+        Returns all available ghost icon styles with their descriptions. No
+        authentication required.
+      </p>
 
       <h3>Parameters</h3>
       <p className="muted">None.</p>
@@ -152,11 +268,11 @@ function StylesSection() {
       "name": "minimal",
       "shortDescription": "Clean, stripped-down ghost silhouette"
     }
-    // ... more styles
+    // ... more styles (11 total)
   ]
 }`}</CodeBlock>
 
-      <h3>Style Fields</h3>
+      <h3>Response Fields</h3>
       <table className="doc-table">
         <thead>
           <tr>
@@ -167,23 +283,38 @@ function StylesSection() {
         </thead>
         <tbody>
           <tr>
-            <td><code>name</code></td>
+            <td><code>styles</code></td>
+            <td>array</td>
+            <td>Array of style objects.</td>
+          </tr>
+          <tr>
+            <td><code>styles[].name</code></td>
             <td>string</td>
             <td>Unique style identifier. Pass this to <code>/api/generate</code>.</td>
           </tr>
           <tr>
-            <td><code>shortDescription</code></td>
+            <td><code>styles[].shortDescription</code></td>
             <td>string</td>
             <td>Human-readable description of the style.</td>
           </tr>
         </tbody>
       </table>
 
-      <h3>Example</h3>
-      <CodeBlock title="cURL">{`curl -s https://omghost.xyz/api/styles | jq .`}</CodeBlock>
-      <CodeBlock title="JavaScript (fetch)">{`const res = await fetch("https://omghost.xyz/api/styles");
+      <h3>Error Responses</h3>
+      <CodeBlock title="500 Internal Server Error">{`{
+  "error": "Failed to fetch styles"
+}`}</CodeBlock>
+
+      <h3>Examples</h3>
+      <CodeBlock title="cURL">{`curl -s ${BASE_URL}/api/styles | jq .`}</CodeBlock>
+      <CodeBlock title="JavaScript">{`const res = await fetch("${BASE_URL}/api/styles");
 const { styles } = await res.json();
-console.log(styles);`}</CodeBlock>
+// styles = [{ name: "classic", shortDescription: "..." }, ...]`}</CodeBlock>
+      <CodeBlock title="Python">{`import requests
+
+resp = requests.get("${BASE_URL}/api/styles")
+styles = resp.json()["styles"]
+# [{"name": "classic", "shortDescription": "..."}, ...]`}</CodeBlock>
     </div>
   );
 }
@@ -202,21 +333,23 @@ function GenerateSection() {
 
       <p>
         Starts an asynchronous SVG generation job. Returns immediately with a{" "}
-        <code>jobId</code> that you poll for completion. This endpoint requires
-        x402 micropayment (<strong>$0.10</strong> per request).
+        <code>jobId</code> that you poll for completion via{" "}
+        <code>/api/generate/[jobId]/status</code>.
+      </p>
+      <p>
+        <strong>Requires x402 payment ($0.10).</strong> See the{" "}
+        <a href="#" onClick={(e) => { e.preventDefault(); }} style={{ color: "var(--accent)" }}>
+          Overview
+        </a>{" "}
+        tab for full x402 protocol details.
       </p>
 
-      <h3>Authentication (x402)</h3>
+      <h3>x402 Payment</h3>
       <p>
-        This endpoint is gated by the{" "}
-        <a href="https://x402.org" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>
-          x402 micropayment protocol
-        </a>
-        . When you call it without payment, you&apos;ll receive an HTTP{" "}
-        <code>402 Payment Required</code> response containing payment
-        instructions. Your x402-compatible client handles payment automatically.
+        Without a valid <code>X-PAYMENT</code> header, the endpoint returns{" "}
+        <code>402 Payment Required</code> with payment instructions:
       </p>
-      <CodeBlock title="402 Payment Required (initial response)">{`{
+      <CodeBlock title="402 Payment Required">{`{
   "accepts": [
     {
       "scheme": "exact",
@@ -228,6 +361,13 @@ function GenerateSection() {
   "description": "Generate a custom SVG icon in your chosen style",
   "mimeType": "application/json"
 }`}</CodeBlock>
+      <p className="muted">
+        The <code>network</code> field identifies the EVM chain (e.g.,{" "}
+        <code>eip155:84532</code> = Base Sepolia). The <code>payTo</code>{" "}
+        field is the recipient wallet address. Use an x402 client library to
+        handle payment automatically, or implement the flow manually (see
+        Overview).
+      </p>
 
       <h3>Request Body</h3>
       <table className="doc-table">
@@ -236,6 +376,7 @@ function GenerateSection() {
             <th>Field</th>
             <th>Type</th>
             <th>Required</th>
+            <th>Constraints</th>
             <th>Description</th>
           </tr>
         </thead>
@@ -244,24 +385,27 @@ function GenerateSection() {
             <td><code>styleName</code></td>
             <td>string</td>
             <td>Yes</td>
+            <td>min 1 char</td>
             <td>
-              Name of the ghost style to use. Must match a style from{" "}
-              <code>/api/styles</code>.
+              Name of the ghost style. Must match a{" "}
+              <code>name</code> from <code>GET /api/styles</code>.
             </td>
           </tr>
           <tr>
             <td><code>brandName</code></td>
             <td>string</td>
             <td>No</td>
-            <td>Your brand or project name (max 100 chars). Influences the icon design.</td>
+            <td>1–100 chars</td>
+            <td>Your brand or project name. Influences the icon design.</td>
           </tr>
           <tr>
             <td><code>brandVoice</code></td>
             <td>string</td>
             <td>No</td>
+            <td>max 500 chars</td>
             <td>
-              Description of your brand voice/personality (max 500 chars). E.g.,
-              &quot;playful and modern&quot; or &quot;corporate and serious&quot;.
+              Brand personality description. E.g. &quot;playful and
+              modern&quot; or &quot;corporate and serious&quot;.
             </td>
           </tr>
         </tbody>
@@ -274,8 +418,36 @@ function GenerateSection() {
   "status": "pending"
 }`}</CodeBlock>
 
+      <h3>Response Fields</h3>
+      <table className="doc-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>jobId</code></td>
+            <td>string</td>
+            <td>Unique job identifier. Use this to poll status.</td>
+          </tr>
+          <tr>
+            <td><code>runId</code></td>
+            <td>string</td>
+            <td>Internal workflow run ID.</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td>string</td>
+            <td>Always <code>&quot;pending&quot;</code> on creation.</td>
+          </tr>
+        </tbody>
+      </table>
+
       <h3>Error Responses</h3>
-      <CodeBlock title="400 Bad Request — Invalid parameters">{`{
+      <CodeBlock title="400 Bad Request — validation error">{`{
   "error": "Invalid request",
   "details": [
     {
@@ -284,22 +456,36 @@ function GenerateSection() {
     }
   ]
 }`}</CodeBlock>
-      <CodeBlock title="404 Not Found — Unknown style">{`{
+      <CodeBlock title="402 Payment Required — no/invalid x402 payment">{`{
+  "accepts": [{ "scheme": "exact", "price": "$0.10", ... }],
+  "description": "...",
+  "mimeType": "application/json"
+}`}</CodeBlock>
+      <CodeBlock title="404 Not Found — style doesn't exist">{`{
   "error": "Style \\"nonexistent\\" not found"
+}`}</CodeBlock>
+      <CodeBlock title="500 Internal Server Error">{`{
+  "error": "Failed to create generation job"
 }`}</CodeBlock>
 
       <h3>Examples</h3>
-      <CodeBlock title="cURL — minimal">{`curl -X POST https://omghost.xyz/api/generate \\
+      <CodeBlock title="cURL — minimal">{`curl -X POST ${BASE_URL}/api/generate \\
   -H "Content-Type: application/json" \\
+  -H "X-PAYMENT: <base64-payment-receipt>" \\
   -d '{"styleName": "classic"}'`}</CodeBlock>
-      <CodeBlock title="cURL — with brand context">{`curl -X POST https://omghost.xyz/api/generate \\
+      <CodeBlock title="cURL — with brand context">{`curl -X POST ${BASE_URL}/api/generate \\
   -H "Content-Type: application/json" \\
+  -H "X-PAYMENT: <base64-payment-receipt>" \\
   -d '{
     "styleName": "pixel",
     "brandName": "Indie Games Studio",
     "brandVoice": "retro, playful, nostalgic"
   }'`}</CodeBlock>
-      <CodeBlock title="JavaScript (fetch)">{`const res = await fetch("https://omghost.xyz/api/generate", {
+      <CodeBlock title="JavaScript (with @x402/client)">{`import { withX402Payment } from "@x402/client";
+
+const x402Fetch = withX402Payment(fetch, { wallet });
+
+const res = await x402Fetch("${BASE_URL}/api/generate", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -309,17 +495,25 @@ function GenerateSection() {
   }),
 });
 
-const { jobId } = await res.json();
-console.log("Job started:", jobId);`}</CodeBlock>
-      <CodeBlock title="Python (requests)">{`import requests
+const { jobId, runId, status } = await res.json();
+// jobId = "cm8abc123...", status = "pending"`}</CodeBlock>
+      <CodeBlock title="Python">{`import requests
 
-resp = requests.post("https://omghost.xyz/api/generate", json={
-    "styleName": "sharp",
-    "brandName": "CyberSec Inc",
-    "brandVoice": "dark, edgy, technical",
-})
+# Note: requires x402 payment handling
+resp = requests.post("${BASE_URL}/api/generate",
+    headers={
+        "Content-Type": "application/json",
+        "X-PAYMENT": "<base64-payment-receipt>",
+    },
+    json={
+        "styleName": "sharp",
+        "brandName": "CyberSec Inc",
+        "brandVoice": "dark, edgy, technical",
+    },
+)
 
-job_id = resp.json()["jobId"]
+data = resp.json()
+job_id = data["jobId"]  # "cm8abc123..."
 print(f"Job started: {job_id}")`}</CodeBlock>
     </div>
   );
@@ -338,9 +532,9 @@ function StatusSection() {
       </div>
 
       <p>
-        Poll this endpoint to check the progress of a generation job. When the
-        status is <code>&quot;completed&quot;</code>, the response includes the
-        generated SVG and an access token.
+        Poll this endpoint to check generation progress. No authentication
+        required. When status is <code>&quot;completed&quot;</code>, the
+        response includes the SVG and an access token.
       </p>
 
       <h3>URL Parameters</h3>
@@ -356,7 +550,7 @@ function StatusSection() {
           <tr>
             <td><code>jobId</code></td>
             <td>string</td>
-            <td>The job ID returned from <code>POST /api/generate</code>.</td>
+            <td>The <code>jobId</code> returned from <code>POST /api/generate</code>.</td>
           </tr>
         </tbody>
       </table>
@@ -383,61 +577,117 @@ function StatusSection() {
   "error": "SVG generation failed after retries"
 }`}</CodeBlock>
 
+      <h3>Response Fields</h3>
+      <table className="doc-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Present When</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>jobId</code></td>
+            <td>string</td>
+            <td>always</td>
+            <td>The job identifier.</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td>string</td>
+            <td>always</td>
+            <td>One of: <code>pending</code>, <code>processing</code>, <code>completed</code>, <code>failed</code>.</td>
+          </tr>
+          <tr>
+            <td><code>token</code></td>
+            <td>string (UUID)</td>
+            <td>completed</td>
+            <td>Permanent access token for <code>/api/asset/[token]</code>.</td>
+          </tr>
+          <tr>
+            <td><code>svg</code></td>
+            <td>string</td>
+            <td>completed</td>
+            <td>The generated SVG markup.</td>
+          </tr>
+          <tr>
+            <td><code>style</code></td>
+            <td>string</td>
+            <td>completed</td>
+            <td>Name of the style used.</td>
+          </tr>
+          <tr>
+            <td><code>error</code></td>
+            <td>string</td>
+            <td>failed</td>
+            <td>Human-readable error message.</td>
+          </tr>
+        </tbody>
+      </table>
+
       <h3>Status Values</h3>
       <table className="doc-table">
         <thead>
           <tr>
             <th>Status</th>
             <th>Description</th>
+            <th>Next Action</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td><code>pending</code></td>
             <td>Job created, waiting to be processed.</td>
+            <td>Poll again in 2s.</td>
           </tr>
           <tr>
             <td><code>processing</code></td>
-            <td>AI is generating the SVG. Typically takes 5–15 seconds.</td>
+            <td>AI is generating the icon. Typically 5–15 seconds.</td>
+            <td>Poll again in 2s.</td>
           </tr>
           <tr>
             <td><code>completed</code></td>
-            <td>SVG ready. Response includes <code>token</code>, <code>svg</code>, and <code>style</code>.</td>
+            <td>Done. SVG, token, and style are in the response.</td>
+            <td>Extract <code>token</code> and <code>svg</code>.</td>
           </tr>
           <tr>
             <td><code>failed</code></td>
-            <td>Generation failed. Check the <code>error</code> field.</td>
+            <td>Generation failed permanently.</td>
+            <td>Read <code>error</code>. Retry with a new generate call.</td>
           </tr>
         </tbody>
       </table>
 
-      <h3>Polling Example</h3>
+      <h3>Polling Examples</h3>
       <CodeBlock title="JavaScript — poll until done">{`async function waitForIcon(jobId) {
   while (true) {
     const res = await fetch(
-      \`https://omghost.xyz/api/generate/\${jobId}/status\`
+      \`${BASE_URL}/api/generate/\${jobId}/status\`
     );
     const data = await res.json();
 
     if (data.status === "completed") {
-      return { token: data.token, svg: data.svg };
+      return { token: data.token, svg: data.svg, style: data.style };
     }
 
     if (data.status === "failed") {
       throw new Error(data.error || "Generation failed");
     }
 
-    // Wait 2 seconds before polling again
+    // Poll every 2 seconds
     await new Promise((r) => setTimeout(r, 2000));
   }
 }`}</CodeBlock>
       <CodeBlock title="Python — poll until done">{`import time
 import requests
 
-def wait_for_icon(job_id):
+def wait_for_icon(job_id: str) -> tuple[str, str]:
+    """Returns (token, svg) on success, raises on failure."""
     while True:
         resp = requests.get(
-            f"https://omghost.xyz/api/generate/{job_id}/status"
+            f"${BASE_URL}/api/generate/{job_id}/status"
         )
         data = resp.json()
 
@@ -451,7 +701,10 @@ def wait_for_icon(job_id):
 
       <h3>Error Responses</h3>
       <CodeBlock title="404 Not Found">{`{
-  "error": "Job not found"
+  "error": "Generation job not found"
+}`}</CodeBlock>
+      <CodeBlock title="500 Internal Server Error">{`{
+  "error": "Failed to check job status"
 }`}</CodeBlock>
     </div>
   );
@@ -471,7 +724,8 @@ function AssetSection() {
 
       <p>
         Retrieve a previously generated SVG asset by its unique token. Tokens
-        are returned in the job status response when generation completes.
+        are permanent and returned in the job status response when generation
+        completes. No authentication required.
       </p>
 
       <h3>URL Parameters</h3>
@@ -487,7 +741,7 @@ function AssetSection() {
           <tr>
             <td><code>token</code></td>
             <td>string (UUID)</td>
-            <td>The unique access token for the asset.</td>
+            <td>The access token from a completed generation job.</td>
           </tr>
         </tbody>
       </table>
@@ -499,7 +753,7 @@ function AssetSection() {
   "style": "classic",
   "brandName": "Acme Corp",
   "brandVoice": "playful and modern",
-  "createdAt": "2025-12-01T10:30:00.000Z"
+  "createdAt": "2026-02-01T10:30:00.000Z"
 }`}</CodeBlock>
 
       <h3>Response Fields</h3>
@@ -514,13 +768,13 @@ function AssetSection() {
         <tbody>
           <tr>
             <td><code>token</code></td>
-            <td>string</td>
-            <td>The asset&apos;s unique token.</td>
+            <td>string (UUID)</td>
+            <td>The asset&apos;s unique access token.</td>
           </tr>
           <tr>
             <td><code>svg</code></td>
             <td>string</td>
-            <td>The complete SVG markup.</td>
+            <td>Complete SVG markup. Ready to embed or save as <code>.svg</code>.</td>
           </tr>
           <tr>
             <td><code>style</code></td>
@@ -530,27 +784,37 @@ function AssetSection() {
           <tr>
             <td><code>brandName</code></td>
             <td>string | null</td>
-            <td>Brand name provided during generation (if any).</td>
+            <td>Brand name provided during generation, or <code>null</code>.</td>
           </tr>
           <tr>
             <td><code>brandVoice</code></td>
             <td>string | null</td>
-            <td>Brand voice provided during generation (if any).</td>
+            <td>Brand voice provided during generation, or <code>null</code>.</td>
           </tr>
           <tr>
             <td><code>createdAt</code></td>
             <td>string (ISO 8601)</td>
-            <td>When the asset was created.</td>
+            <td>When the asset was generated.</td>
           </tr>
         </tbody>
       </table>
 
-      <h3>Example</h3>
-      <CodeBlock title="cURL">{`curl -s https://omghost.xyz/api/asset/a1b2c3d4-e5f6-7890-abcd-ef1234567890 | jq .`}</CodeBlock>
+      <h3>Examples</h3>
+      <CodeBlock title="cURL">{`curl -s ${BASE_URL}/api/asset/a1b2c3d4-e5f6-7890-abcd-ef1234567890 | jq .`}</CodeBlock>
+      <CodeBlock title="JavaScript">{`const res = await fetch(
+  "${BASE_URL}/api/asset/a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+);
+const { token, svg, style, brandName, brandVoice, createdAt } = await res.json();`}</CodeBlock>
 
       <h3>Error Responses</h3>
+      <CodeBlock title="400 Bad Request — missing token">{`{
+  "error": "Token is required"
+}`}</CodeBlock>
       <CodeBlock title="404 Not Found">{`{
   "error": "Asset not found"
+}`}</CodeBlock>
+      <CodeBlock title="500 Internal Server Error">{`{
+  "error": "Failed to fetch asset"
 }`}</CodeBlock>
     </div>
   );
@@ -570,7 +834,7 @@ function RateSection() {
 
       <p>
         Submit a rating for a generated icon. Each token can only be rated once.
-        Ratings help improve style quality over time.
+        No authentication or payment required.
       </p>
 
       <h3>Request Body</h3>
@@ -580,33 +844,38 @@ function RateSection() {
             <th>Field</th>
             <th>Type</th>
             <th>Required</th>
+            <th>Constraints</th>
             <th>Description</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td><code>token</code></td>
-            <td>string (UUID)</td>
+            <td>string</td>
             <td>Yes</td>
-            <td>The token of the asset to rate.</td>
+            <td>valid UUID</td>
+            <td>The asset token to rate.</td>
           </tr>
           <tr>
             <td><code>rating</code></td>
-            <td>integer (1–5)</td>
+            <td>integer</td>
             <td>Yes</td>
+            <td>1–5</td>
             <td>Rating score. 1 = poor, 5 = excellent.</td>
           </tr>
           <tr>
             <td><code>styleName</code></td>
             <td>string</td>
             <td>Yes</td>
-            <td>Name of the style used (for aggregation).</td>
+            <td>min 1 char</td>
+            <td>Name of the style used. Must match a valid style.</td>
           </tr>
           <tr>
             <td><code>text</code></td>
             <td>string</td>
             <td>No</td>
-            <td>Optional written feedback (max 1000 chars).</td>
+            <td>max 1000 chars</td>
+            <td>Optional written feedback.</td>
           </tr>
         </tbody>
       </table>
@@ -617,8 +886,31 @@ function RateSection() {
   "averageRating": 4.2
 }`}</CodeBlock>
 
+      <h3>Response Fields</h3>
+      <table className="doc-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>success</code></td>
+            <td>boolean</td>
+            <td>Always <code>true</code> on success.</td>
+          </tr>
+          <tr>
+            <td><code>averageRating</code></td>
+            <td>number</td>
+            <td>Updated average rating for this style (across all ratings).</td>
+          </tr>
+        </tbody>
+      </table>
+
       <h3>Error Responses</h3>
-      <CodeBlock title="400 Bad Request">{`{
+      <CodeBlock title="400 Bad Request — validation error">{`{
   "error": "Invalid request",
   "details": [
     {
@@ -627,15 +919,18 @@ function RateSection() {
     }
   ]
 }`}</CodeBlock>
-      <CodeBlock title="404 Not Found">{`{
+      <CodeBlock title="404 Not Found — style doesn't exist">{`{
   "error": "Style \\"nonexistent\\" not found"
 }`}</CodeBlock>
-      <CodeBlock title="409 Conflict — Already rated">{`{
+      <CodeBlock title="409 Conflict — already rated">{`{
   "error": "This token has already been rated"
 }`}</CodeBlock>
+      <CodeBlock title="500 Internal Server Error">{`{
+  "error": "Failed to submit rating"
+}`}</CodeBlock>
 
-      <h3>Example</h3>
-      <CodeBlock title="cURL">{`curl -X POST https://omghost.xyz/api/rate \\
+      <h3>Examples</h3>
+      <CodeBlock title="cURL">{`curl -X POST ${BASE_URL}/api/rate \\
   -H "Content-Type: application/json" \\
   -d '{
     "token": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -643,7 +938,7 @@ function RateSection() {
     "styleName": "classic",
     "text": "Love it!"
   }'`}</CodeBlock>
-      <CodeBlock title="JavaScript (fetch)">{`const res = await fetch("https://omghost.xyz/api/rate", {
+      <CodeBlock title="JavaScript">{`const res = await fetch("${BASE_URL}/api/rate", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -654,7 +949,19 @@ function RateSection() {
   }),
 });
 
-const { success, averageRating } = await res.json();`}</CodeBlock>
+const { success, averageRating } = await res.json();
+// success = true, averageRating = 4.2`}</CodeBlock>
+      <CodeBlock title="Python">{`import requests
+
+resp = requests.post("${BASE_URL}/api/rate", json={
+    "token": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "rating": 5,
+    "styleName": "classic",
+    "text": "Great quality!",
+})
+
+data = resp.json()
+# {"success": True, "averageRating": 4.2}`}</CodeBlock>
     </div>
   );
 }

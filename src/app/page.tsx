@@ -240,32 +240,16 @@ export default function Home() {
       </div>
 
       {/* ── PRICING ────────────────────────────────── */}
-      <section id="pricing" style={{ padding: "100px 48px" }}>
-        <div className="pricing-section">
-          <div className="section-kicker" style={{ textAlign: "center" }}>Pricing</div>
-          <h2 className="section-title" style={{ textAlign: "center" }}>Pay for what<br />you use.</h2>
-          <p className="section-body" style={{ margin: "0 auto", textAlign: "center", maxWidth: 480 }}>
-            No subscriptions. No annual commitments. x402 micropayments mean you pay exactly per image generated.
-          </p>
-
-          <div className="pricing-grid" style={{ maxWidth: 420, margin: "0 auto" }}>
-            <div className="pricing-card featured">
-              <div className="pricing-tag">Simple Pricing</div>
-              <div className="pricing-tier">Per Image</div>
-              <div className="pricing-price">$0.10<sub>/image</sub></div>
-              <div className="pricing-detail">SVG &amp; PNG · Pay as you go</div>
-              <ul className="pricing-features">
-                <li>All 11 ghost styles</li>
-                <li>AI-powered SVG generation</li>
-                <li>Full color customization</li>
-                <li>Production-ready SVG &amp; PNG output</li>
-                <li>No accounts · No API keys</li>
-                <li>x402 micropayments · Instant settlement</li>
-              </ul>
-              <a href="/docs" className="pricing-btn pricing-btn-filled">View API Docs</a>
-            </div>
-          </div>
-        </div>
+      <section id="pricing" style={{ padding: "100px 48px", textAlign: "center" }}>
+        <div className="section-kicker">Pricing</div>
+        <h2 className="section-title" style={{ fontSize: 64, marginBottom: 8 }}>
+          $0.10<span style={{ fontWeight: 400, fontSize: 24, opacity: 0.5 }}> / image</span>
+        </h2>
+        <p className="section-body" style={{ margin: "0 auto", maxWidth: 520 }}>
+          SVG &amp; PNG · No API keys · No subscriptions · Pay per request with{" "}
+          <a href="https://x402.org" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>x402</a> micropayments
+        </p>
+        <a href="/docs" className="cta-btn" style={{ marginTop: 32, display: "inline-block" }}>View API Docs</a>
       </section>
 
       {/* ── FOOTER ─────────────────────────────────── */}
