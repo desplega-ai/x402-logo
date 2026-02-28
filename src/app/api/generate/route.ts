@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateSvgForJob } from "@/lib/generate-svg";
+import { start } from "workflow/api";
+import { generateSvgWorkflow } from "@/workflows/generate-svg";
 import { z } from "zod/v4";
 
 const generateSchema = z.object({
@@ -23,8 +24,17 @@ export async function POST(request: NextRequest) {
 
     const { styleName, brandName, brandVoice } = parsed.data;
 
+    // Fetch style with systemPrompt and svgExamples
+    // (style data is passed to the workflow as args since workflow steps
+    //  can't use Prisma directly — Node.js modules unavailable in WDK)
     const style = await prisma.style.findUnique({
       where: { name: styleName },
+      select: {
+        id: true,
+        name: true,
+        systemPrompt: true,
+        svgExamples: true,
+      },
     });
 
     if (!style) {
@@ -45,14 +55,24 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Fire-and-forget: kick off SVG generation in the background
-    generateSvgForJob(job.id).catch((err) => {
-      console.error(`Background SVG generation failed for job ${job.id}:`, err);
-    });
+    const svgExamples = Array.isArray(style.svgExamples)
+      ? (style.svgExamples as string[])
+      : [];
 
-    // Return immediately with the job ID for polling
+    // Start the durable workflow (returns immediately)
+    const run = await start(generateSvgWorkflow, [
+      job.id,
+      style.id,
+      style.name,
+      style.systemPrompt,
+      svgExamples,
+      brandName ?? null,
+      brandVoice ?? null,
+    ]);
+
     return NextResponse.json({
       jobId: job.id,
+      runId: run.runId,
       status: "pending",
     });
   } catch (error) {

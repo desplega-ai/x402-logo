@@ -22,4 +22,4 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export const DEFAULT_MODEL =
-  process.env.OPENROUTER_MODEL || "google/gemini-2.5-pro";
+  process.env.OPENROUTER_MODEL || "google/gemini-3.1-flash-image-preview";
