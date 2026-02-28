@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { start } from "workflow/api";
+import { generateSvgWorkflow } from "@/workflows/generate-svg";
 import { z } from "zod/v4";
 
 const generateSchema = z.object({
@@ -22,8 +24,17 @@ export async function POST(request: NextRequest) {
 
     const { styleName, brandName, brandVoice } = parsed.data;
 
+    // Fetch style with systemPrompt and svgExamples
+    // (style data is passed to the workflow as args since workflow steps
+    //  can't use Prisma directly — Node.js modules unavailable in WDK)
     const style = await prisma.style.findUnique({
       where: { name: styleName },
+      select: {
+        id: true,
+        name: true,
+        systemPrompt: true,
+        svgExamples: true,
+      },
     });
 
     if (!style) {
@@ -40,49 +51,34 @@ export async function POST(request: NextRequest) {
         styleId: style.id,
         brandName: brandName ?? null,
         brandVoice: brandVoice ?? null,
-        status: "processing",
+        status: "pending",
       },
     });
 
-    try {
-      // Skip real image generation — store empty SVG placeholder
-      const asset = await prisma.asset.create({
-        data: {
-          asset: "<svg></svg>",
-          styleId: style.id,
-          brandName: brandName ?? null,
-          brandVoice: brandVoice ?? null,
-          jobId: job.id,
-        },
-      });
+    const svgExamples = Array.isArray(style.svgExamples)
+      ? (style.svgExamples as string[])
+      : [];
 
-      // Mark job as completed
-      await prisma.generationJob.update({
-        where: { id: job.id },
-        data: { status: "completed" },
-      });
+    // Start the durable workflow (returns immediately)
+    const run = await start(generateSvgWorkflow, [
+      job.id,
+      style.id,
+      style.name,
+      style.systemPrompt,
+      svgExamples,
+      brandName ?? null,
+      brandVoice ?? null,
+    ]);
 
-      return NextResponse.json({
-        token: asset.token,
-        svg: asset.asset,
-        style: style.name,
-      });
-    } catch (genError) {
-      // Mark job as failed if asset creation fails
-      await prisma.generationJob.update({
-        where: { id: job.id },
-        data: {
-          status: "failed",
-          error: genError instanceof Error ? genError.message : "Unknown error",
-          retryCount: { increment: 1 },
-        },
-      });
-      throw genError;
-    }
+    return NextResponse.json({
+      jobId: job.id,
+      runId: run.runId,
+      status: "pending",
+    });
   } catch (error) {
-    console.error("Error generating asset:", error);
+    console.error("Error creating generation job:", error);
     return NextResponse.json(
-      { error: "Failed to generate asset" },
+      { error: "Failed to create generation job" },
       { status: 500 }
     );
   }
