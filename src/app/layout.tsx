@@ -2,24 +2,24 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "x402-logo — Instant SVG Logos via API",
+  title: "Pimp My SVG — AI-Powered SVG Logo Generation",
   description:
-    "Generate professional SVG logos instantly with battle-tested industry styles. Pay-per-request with x402 crypto micropayments. No signup required.",
+    "Generate professional SVG logos instantly with AI. Choose from battle-tested styles, describe your brand, get a pixel-perfect vector. Pay per request with x402.",
   keywords: [
     "SVG logo",
-    "logo API",
     "logo generation",
-    "x402",
-    "crypto payments",
-    "micropayments",
-    "API-first",
+    "AI logo",
     "vector logo",
+    "x402",
+    "pimpmysvg",
+    "API-first",
   ],
   openGraph: {
-    title: "x402-logo — Instant SVG Logos via API",
+    title: "Pimp My SVG — AI-Powered SVG Logo Generation",
     description:
       "Professional SVG logos in seconds. Battle-tested styles, pay-per-request with x402.",
     type: "website",
+    url: "https://pimpmysvg.xyz",
   },
 };
 
@@ -42,9 +42,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-white text-gray-900 font-sans antialiased">
-        {children}
-      </body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }
