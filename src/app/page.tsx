@@ -277,6 +277,14 @@ export default function Home() {
         </div>
         <div className="footer-copy">&copy; 2026 omghost &middot; Built with x402</div>
       </footer>
+
+      {/* ── OMGHOST LOGO ──────────────────────────── */}
+      <div className="omghost-footer-logo">
+        <a href="https://omghost.xyz" aria-label="OMGHOST">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/omghost-desplega.svg" alt="OMGHOST" width={32} height={32} />
+        </a>
+      </div>
     </>
   );
 }
