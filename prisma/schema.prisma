@@ -28,6 +28,7 @@ model Style {
 
 model LogoGeneration {
   id            String   @id @default(cuid())
+  token         String   @unique @default(uuid())
   styleId       String
   style         Style    @relation(fields: [styleId], references: [id])
   brandName     String
@@ -38,8 +39,8 @@ model LogoGeneration {
   walletAddress String?
   rating        Int?
   ratingFeedback String?
-  refundUsd     Decimal? @db.Decimal(10, 4)
-  refundTxHash  String?
+  rewardUsd     Decimal? @db.Decimal(10, 4)
+  rewardTxHash  String?
   createdAt     DateTime @default(now()) @db.Timestamptz
   updatedAt     DateTime @updatedAt @db.Timestamptz
 

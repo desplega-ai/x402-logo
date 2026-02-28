@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod/v4";
 
 const rateSchema = z.object({
-  generationId: z.string().min(1, "Generation ID is required"),
+  token: z.string().uuid("A valid generation token is required"),
   rating: z.number().int().min(1).max(5),
   feedback: z.string().max(1000).optional(),
 });
@@ -20,43 +20,51 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { generationId, rating, feedback } = parsed.data;
+    const { token, rating, feedback } = parsed.data;
 
-    // Find the generation
+    // Find the generation by token
     const generation = await prisma.logoGeneration.findUnique({
-      where: { id: generationId },
+      where: { token },
       include: { style: true },
     });
 
     if (!generation) {
       return NextResponse.json(
-        { error: "Logo generation not found" },
+        { error: "Generation not found. Invalid token." },
         { status: 404 }
       );
     }
 
+    // Verify that a payment actually happened
+    if (!generation.paymentTxHash) {
+      return NextResponse.json(
+        { error: "No payment record found for this generation. Review rewards require a verified payment." },
+        { status: 402 }
+      );
+    }
+
+    // Idempotency — rating + reward can only happen once
     if (generation.rating !== null) {
       return NextResponse.json(
-        { error: "This logo has already been rated" },
+        { error: "This logo has already been reviewed" },
         { status: 409 }
       );
     }
 
-    // Calculate 30% refund
-    const refundUsd = Number(generation.priceUsd) * 0.3;
+    // Calculate 30% review reward
+    const rewardUsd = Number(generation.priceUsd) * 0.3;
 
-    // TODO: Execute x402 refund transaction
-    // The refund will be sent back to generation.walletAddress
-    const refundTxHash = null; // Will be set when x402 refund is implemented
+    // TODO: Execute x402 reward transaction
+    const rewardTxHash = null; // Will be set when x402 reward payout is implemented
 
-    // Update the generation with rating and refund info
+    // Update the generation with rating and reward info
     const updated = await prisma.logoGeneration.update({
-      where: { id: generationId },
+      where: { token },
       data: {
         rating,
         ratingFeedback: feedback ?? null,
-        refundUsd,
-        refundTxHash,
+        rewardUsd,
+        rewardTxHash,
       },
     });
 
@@ -80,15 +88,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       id: updated.id,
+      token: updated.token,
       rating: updated.rating,
-      refundUsd: Number(refundUsd),
-      refundTxHash,
-      message: `Thank you for rating! ${Number(refundUsd).toFixed(4)} USDC refund ${refundTxHash ? "processed" : "pending"}.`,
+      rewardUsd: Number(rewardUsd),
+      rewardTxHash,
+      message: `Thanks for your review! Your ${Number(rewardUsd).toFixed(4)} USDC reward is ${rewardTxHash ? "on its way" : "pending"}.`,
     });
   } catch (error) {
     console.error("Error rating logo:", error);
     return NextResponse.json(
-      { error: "Failed to rate logo" },
+      { error: "Failed to submit review" },
       { status: 500 }
     );
   }
