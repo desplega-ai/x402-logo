@@ -749,6 +749,27 @@ body {
   letter-spacing: 0.08em;
 }
 
+/* ── ATTRIBUTION ──────────────────────────────── */
+.attribution {
+  text-align: center;
+  padding: 16px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #333;
+  letter-spacing: 0.04em;
+  background: var(--black);
+}
+
+.attribution a {
+  color: #444;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.attribution a:hover {
+  color: var(--accent);
+}
+
 /* ── SCROLLBAR ─────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 4px;
