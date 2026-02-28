@@ -1,6 +1,6 @@
 # x402-logo
 
-API-first SVG logo generation service using Vercel Workflow + OpenRouter.
+API-first SVG logo generation service using Vercel Workflow, OpenRouter (Gemini), and Runware vectorization.
 
 ## Quick Start
 
@@ -36,8 +36,12 @@ vercel env pull .env.local --yes
 | Variable | Description |
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string (Vercel Postgres / Neon) |
-| `OPENROUTER_API_KEY` | OpenRouter API key for LLM-based SVG generation |
+| `OPENROUTER_API_KEY` | OpenRouter API key for Gemini image generation |
 | `OPENROUTER_MODEL` | Optional. Default: `google/gemini-3.1-flash-image-preview` |
+| `RUNWARE_API_KEY` | Runware API key for PNG-to-SVG vectorization |
+| `X402_WALLET_ADDRESS` | Wallet address for x402 micropayments |
+| `X402_FACILITATOR_URL` | x402 facilitator URL (default: https://www.x402.org/facilitator) |
+| `X402_NETWORK` | x402 network (default: `eip155:84532` Base Sepolia testnet) |
 
 ## Database
 
@@ -45,10 +49,13 @@ Uses Prisma 7 with the `@prisma/adapter-pg` driver adapter.
 
 ```bash
 pnpm db:generate   # Generate Prisma client
+pnpm db:migrate    # Run migrations (dev)
 pnpm db:push       # Push schema to database (requires DATABASE_URL exported)
 pnpm db:seed       # Seed with 8 hand-crafted styles
 pnpm db:studio     # Open Prisma Studio
 ```
+
+For production, use `prisma migrate deploy` instead of `db:push`.
 
 **Note:** For Prisma CLI commands (`db:push`, `db:migrate`), the `DATABASE_URL` must be available
 via `dotenv/config` (loaded from `.env` or `.env.local`). The `prisma.config.ts` reads it from
@@ -58,11 +65,12 @@ via `dotenv/config` (loaded from `.env` or `.env.local`). The `prisma.config.ts`
 
 ### SVG Generation Flow
 
-1. `POST /api/generate` — Creates a GenerationJob, starts a durable Vercel Workflow
-2. Workflow step `callOpenRouter` — Calls OpenRouter API with structured JSON output
-3. Workflow step `storeAsset` — Stores SVG via internal API (Prisma unavailable in workflow sandbox)
-4. `GET /api/generate/{jobId}/status` — Poll for completion (pending → completed/failed)
-5. `GET /api/asset/{token}` — Retrieve the generated SVG by token
+1. `POST /api/generate` — Creates a GenerationJob, starts a durable Vercel Workflow (x402-gated)
+2. Workflow step `generatePng` — Calls OpenRouter (Gemini) to generate a PNG logo
+3. Workflow step `vectorizePng` — Sends PNG to Runware for SVG vectorization
+4. Workflow step `storeAssets` — Stores both PNG and SVG via internal API (Prisma unavailable in workflow sandbox)
+5. `GET /api/generate/{jobId}/status` — Poll for completion (pending → completed/failed)
+6. `GET /api/asset/{token}` — Retrieve the generated SVG by token
 
 ### Key Constraint
 
