@@ -8,6 +8,19 @@ const STYLES = [
     id: "classic",
     name: "Classic",
     desc: "The original ghost silhouette",
+    prompt: `Construction: The entire icon is a single filled silhouette — a smooth dome top curving into straight sides, ending in a rhythmic row of evenly-spaced pointed scallops along the bottom. The scallops are the signature element: uniform V-shaped notches, 4 of them, perfectly symmetrical. The shape is clean and consistent — no wobble, no organic variation.
+
+Eyes: Two vertical ellipses sit symmetrically in the upper body, slightly above center. They are filled with the background color, reading as cut-outs from the ghost body. No mouth, no brows, no expression — eyes only.
+
+Style: Flat and fully filled. A single solid color for the body. Optional thin stroke outline of the same or darker hue. No gradients, no shading, no textures, no drop shadows.
+
+Color: Ghost body is one solid color. Background is a flat contrasting color. Two colors total maximum.
+
+Rendering: Legible at small sizes. Centered on a square canvas with even padding. Should feel at home in an app icon set or UI library.
+
+No extras: No labels, no frames, no glow. Ghost silhouette and background only.
+
+Adaptation rule: Aim to keep the structural logic — dome top, straight sides, scalloped bottom, two elliptical eye cut-outs — but replace the ghost body shape with the target subject. The scallop count and eye proportions should scale naturally to the new shape.`,
     render: ({ fill, stroke, bg, sw }: GhostProps) => (
       <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M100 20 C55 20 30 55 30 95 L30 185 L50 165 L70 185 L90 165 L110 185 L130 165 L150 185 L170 165 L170 95 C170 55 145 20 100 20Z" fill={fill} stroke={stroke} strokeWidth={sw} />
@@ -20,6 +33,19 @@ const STYLES = [
     id: "rounded",
     name: "Chubby",
     desc: "Extra soft and round",
+    prompt: `Construction: The icon is a single filled silhouette — a wide, generously rounded dome top that flows into a broad, inflated body. The sides belly outward rather than dropping straight, giving a soft, pillowy feel. The bottom edge ends in a series of smooth, rounded lobes connected by gentle quadratic curves — not sharp scallops, but soft wave-like bumps that feel almost like a ruffle or a plush toy's hem. The overall shape is wider and rounder than Classic, with more mass everywhere.
+
+Eyes: Two large vertical ellipses sit symmetrically in the upper body, slightly bigger relative to the body than in Classic. They are filled with the background color, reading as cut-outs. No mouth, no brows — eyes only. The oversized eyes reinforce the soft, cartoonish proportions.
+
+Style: Flat and fully filled. One solid color for the body. Optional thin stroke. No gradients, no shading, no textures, no drop shadows. The roundness does all the expressive work — no detail needed.
+
+Color: Ghost body is one solid color. Background is a flat contrasting color. Two colors total maximum.
+
+Rendering: Centered on a square canvas with even padding. Should feel friendly and approachable — like a children's sticker or a plush toy rendered flat.
+
+No extras: No labels, no frames, no glow. Silhouette and background only.
+
+Adaptation rule: Aim to maintain the same structural logic without jeopardizing the natural shape — wide rounded dome, inflated sides, soft lobed bottom edge, two large elliptical eye cut-outs — but apply it to the target subject. Every corner, edge and terminus should be maximally rounded. When in doubt, make it rounder.`,
     render: ({ fill, stroke, bg, sw }: GhostProps) => (
       <svg viewBox="0 0 200 230" fill="none">
         <path d="M100 18 C48 18 25 60 25 100 L25 192 Q25 200 33 196 L48 188 Q56 183 64 188 L80 197 Q88 202 96 197 L104 192 Q112 187 120 192 L136 201 Q144 206 152 201 L167 192 Q175 187 175 192 L175 100 C175 60 152 18 100 18Z" fill={fill} stroke={stroke} strokeWidth={sw} />
@@ -32,13 +58,26 @@ const STYLES = [
     id: "outline",
     name: "Outline",
     desc: "Clean line art ghost",
+    prompt: `Construction: The icon is drawn entirely as a thick stroked outline — no filled body whatsoever. The ghost silhouette (dome top, straight sides, scalloped bottom) exists only as a continuous stroke path. The inside of the shape is fully transparent, revealing the background. The stroke has rounded joins and rounded caps everywhere, giving it a clean, friendly line-art quality. Stroke weight should be bold enough to read clearly at small sizes — never hairline thin.
+
+Eyes: The eyes are the one exception to the outline-only rule. Each eye is a solid filled ellipse in the stroke color, with a smaller ellipse cut into it (filled with the background color) to create a highlight or pupil. This makes the eyes pop as the only filled elements in the composition, creating a natural focal point against the transparent body.
+
+Style: Line art only. One stroke color throughout. The interior of all shapes is empty. No filled regions except the eyes. No gradients, no shading, no textures, no drop shadows. Crisp and graphic.
+
+Color: One stroke color (white, black, or a single accent). Background is flat and contrasting. The stroke color is reused for the eye fills. Two colors total maximum.
+
+Rendering: Centered on a square canvas with even padding. Should feel at home in an icon font, a wireframe UI kit, or as a badge outline. Legible at small sizes.
+
+No extras: No labels, no frames, no glow. Outline stroke and background only.
+
+Adaptation rule: Keep the same structural logic — the entire subject is rendered as a continuous thick outline stroke with rounded caps and joins, interior fully transparent, with any key focal detail (equivalent to the eyes) rendered as small solid filled shapes for contrast.`,
     render: ({ fill, stroke, bg, sw }: GhostProps) => (
       <svg viewBox="0 0 200 220" fill="none">
         <path d="M100 22 C56 22 32 58 32 97 L32 183 L52 163 L72 183 L92 163 L112 183 L132 163 L152 183 L168 163 L168 97 C168 58 144 22 100 22Z" fill="none" stroke={fill} strokeWidth={Math.max(sw, 5)} strokeLinejoin="round" strokeLinecap="round" />
         <ellipse cx="80" cy="96" rx="13" ry="16" fill={fill} />
         <ellipse cx="120" cy="96" rx="13" ry="16" fill={fill} />
-        <ellipse cx="78" cy="93" rx="4" ry="5" fill={bg === "#ffffff" ? "#fff" : bg} />
-        <ellipse cx="118" cy="93" rx="4" ry="5" fill={bg === "#ffffff" ? "#fff" : bg} />
+        <ellipse cx="78" cy="93" rx="4" ry="5" fill={bg} />
+        <ellipse cx="118" cy="93" rx="4" ry="5" fill={bg} />
       </svg>
     ),
   },
@@ -118,6 +157,19 @@ const STYLES = [
     id: "dot",
     name: "Dot",
     desc: "Halftone dot matrix ghost",
+    prompt: `Canvas: viewBox="0 0 200 220" with fill="none". No background rectangle.
+
+Grid system: All dots sit on a strict 13px grid — every dot's cx and cy follow the pattern offset + (col × 13) where the grid is centered on the canvas. Use offsetX = (200 - COLS × 13) / 2 and offsetY = (220 - ROWS × 13) / 2 to center the grid.
+
+Dots: Each dot is a <circle> with r="5.2". All body dots share one flat fill color. No gradients, no strokes, no outlines on any dot.
+
+Grid dimensions: 14-column × 16-row grid (COLS=14, ROWS=16). 182×208px active area centered inside the 200×220 canvas.
+
+Shape construction: Think of the grid as a stencil. For each of the 16 rows, decide which of the 14 column positions fall inside the icon silhouette.
+
+Internal details: Eyes/cutouts are represented by overriding specific grid positions with bg color (value 2 in mask). Never remove dots for interior details — always replace their color.
+
+Code structure: Group all primary body dots inside a single <g> element. Place eye/detail override circles outside the group after it.`,
     render: ({ fill, bg }: GhostProps) => {
       const R = 5.2, G = 13;
       const mask = [
