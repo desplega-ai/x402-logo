@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { generateSvg } from "@/lib/generate-svg";
 import { z } from "zod/v4";
 
 const generateSchema = z.object({
@@ -22,8 +23,15 @@ export async function POST(request: NextRequest) {
 
     const { styleName, brandName, brandVoice } = parsed.data;
 
+    // Load style with systemPrompt and svgExamples for generation
     const style = await prisma.style.findUnique({
       where: { name: styleName },
+      select: {
+        id: true,
+        name: true,
+        systemPrompt: true,
+        svgExamples: true,
+      },
     });
 
     if (!style) {
@@ -45,10 +53,19 @@ export async function POST(request: NextRequest) {
     });
 
     try {
-      // Skip real image generation — store empty SVG placeholder
+      // Generate SVG via OpenRouter
+      const svg = await generateSvg({
+        systemPrompt: style.systemPrompt,
+        svgExamples: Array.isArray(style.svgExamples)
+          ? (style.svgExamples as string[])
+          : [],
+        brandName,
+        brandVoice,
+      });
+
       const asset = await prisma.asset.create({
         data: {
-          asset: "<svg></svg>",
+          asset: svg,
           styleId: style.id,
           brandName: brandName ?? null,
           brandVoice: brandVoice ?? null,
@@ -68,12 +85,13 @@ export async function POST(request: NextRequest) {
         style: style.name,
       });
     } catch (genError) {
-      // Mark job as failed if asset creation fails
+      // Mark job as failed
       await prisma.generationJob.update({
         where: { id: job.id },
         data: {
           status: "failed",
-          error: genError instanceof Error ? genError.message : "Unknown error",
+          error:
+            genError instanceof Error ? genError.message : "Unknown error",
           retryCount: { increment: 1 },
         },
       });
