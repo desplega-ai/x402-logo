@@ -8,43 +8,46 @@ datasource db {
 }
 
 model Style {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  slug        String   @unique
-  description String
-  priceUsd    Decimal  @db.Decimal(10, 4)
-  rating      Decimal  @default(0) @db.Decimal(3, 2)
-  ratingCount Int      @default(0)
-  color       String // tailwind gradient classes
-  iconSvg     String   @db.Text
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @db.Timestamptz
-  updatedAt   DateTime @updatedAt @db.Timestamptz
+  id               String   @id @default(cuid())
+  name             String   @unique
+  shortDescription String   @map("short_description")
+  systemPrompt     String   @db.Text @map("system_prompt")
+  svgExamples      Json     @default("[]") @map("svg_examples")
+  averageRating    Float    @default(0) @map("average_rating")
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  updatedAt        DateTime @updatedAt @db.Timestamptz
 
-  generations LogoGeneration[]
+  rates  Rate[]
+  assets Asset[]
 
   @@map("styles")
 }
 
-model LogoGeneration {
-  id            String   @id @default(cuid())
-  token         String   @unique @default(uuid())
-  styleId       String
-  style         Style    @relation(fields: [styleId], references: [id])
-  brandName     String
-  brandVoice    String
-  svgContent    String?  @db.Text
-  priceUsd      Decimal  @db.Decimal(10, 4)
-  paymentTxHash String?
-  walletAddress String?
-  rating        Int?
-  ratingFeedback String?
-  rewardUsd     Decimal? @db.Decimal(10, 4)
-  rewardTxHash  String?
-  createdAt     DateTime @default(now()) @db.Timestamptz
-  updatedAt     DateTime @updatedAt @db.Timestamptz
+model Rate {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  text      String?  @db.Text
+  rating    Int
+  styleId   String   @map("style_id")
+  style     Style    @relation(fields: [styleId], references: [id])
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
 
-  @@index([walletAddress])
   @@index([styleId])
-  @@map("logo_generations")
+  @@map("rates")
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  token     String   @unique @default(uuid())
+  asset     String   @db.Text
+  styleId   String   @map("style_id")
+  style     Style    @relation(fields: [styleId], references: [id])
+  brandName String?  @map("brand_name")
+  brandVoice String? @map("brand_voice")
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([styleId])
+  @@map("assets")
 }
