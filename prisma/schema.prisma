@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Style {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String
+  priceUsd    Decimal  @db.Decimal(10, 4)
+  rating      Decimal  @default(0) @db.Decimal(3, 2)
+  ratingCount Int      @default(0)
+  color       String // tailwind gradient classes
+  iconSvg     String   @db.Text
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  generations LogoGeneration[]
+
+  @@map("styles")
+}
+
+model LogoGeneration {
+  id            String   @id @default(cuid())
+  styleId       String
+  style         Style    @relation(fields: [styleId], references: [id])
+  brandName     String
+  brandVoice    String
+  svgContent    String?  @db.Text
+  priceUsd      Decimal  @db.Decimal(10, 4)
+  paymentTxHash String?
+  walletAddress String?
+  rating        Int?
+  ratingFeedback String?
+  refundUsd     Decimal? @db.Decimal(10, 4)
+  refundTxHash  String?
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  @@index([walletAddress])
+  @@index([styleId])
+  @@map("logo_generations")
+}
