@@ -428,13 +428,20 @@ function useIsMobile(breakpoint = 768) {
 
 /* ── Ghost Studio App ─────────────────────────────── */
 export default function GhostStudio() {
-  const [styleIdx, setStyleIdx] = useState(0);
+  const [styleIdx, _setStyleIdx] = useState(0);
   const [ghostColor, setGhostColor] = useState("#e8ff4f");
   const [eyeColor, setEyeColor] = useState("#080808");
   const [bgColor, setBgColor] = useState("#0e0e0e");
   const [activeTarget, setActiveTarget] = useState<"ghost" | "eye" | "bg">("ghost");
   const [strokeWidth, setStrokeWidth] = useState(0);
   const [mobilePanel, setMobilePanel] = useState<"preview" | "controls">("preview");
+  const [showGif, setShowGif] = useState(true);
+
+  // Shadow setStyleIdx to auto-dismiss GIF on any style interaction
+  const setStyleIdx = useCallback((val: number | ((prev: number) => number)) => {
+    setShowGif(false);
+    _setStyleIdx(val);
+  }, []);
   const isMobile = useIsMobile();
 
   const activeStyle = STYLES[styleIdx];
@@ -444,6 +451,7 @@ export default function GhostStudio() {
   const setActiveColor = (c: string) => setTargetColor[activeTarget](c);
 
   const randomizeColors = () => {
+    setShowGif(false);
     const randHex = () => "#" + Array.from({ length: 3 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join("");
     setGhostColor(randHex());
     setEyeColor(randHex());
@@ -533,6 +541,18 @@ export default function GhostStudio() {
               onTouchEnd={handleTouchEnd}
             >
               <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(rgba(0,0,0,0.6) 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
+              {/* Ghost GIF overlay — shown by default, dismissed on interaction */}
+              <img
+                src="/omghost.gif"
+                alt=""
+                style={{
+                  position: "absolute", inset: 0, width: "100%", height: "100%",
+                  objectFit: "contain", zIndex: 10,
+                  opacity: showGif ? 1 : 0,
+                  transition: "opacity 0.5s ease-out",
+                  pointerEvents: showGif ? "auto" : "none",
+                }}
+              />
               <div key={styleIdx} className="ghost-anim" style={{ width: 160, height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {activeStyle.render(ghostProps)}
               </div>
@@ -765,6 +785,18 @@ export default function GhostStudio() {
         {/* Center Preview */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: bgColor, position: "relative", transition: "background 0.3s" }}>
           <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(rgba(0,0,0,0.6) 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
+          {/* Ghost GIF overlay — shown by default, dismissed on interaction */}
+          <img
+            src="/omghost.gif"
+            alt=""
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "contain", zIndex: 10,
+              opacity: showGif ? 1 : 0,
+              transition: "opacity 0.5s ease-out",
+              pointerEvents: showGif ? "auto" : "none",
+            }}
+          />
           <div key={styleIdx} className="ghost-anim" style={{ width: 230, height: 230, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {activeStyle.render(ghostProps)}
           </div>
