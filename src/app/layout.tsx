@@ -2,24 +2,27 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pimp My SVG — AI-Powered SVG Logo Generation",
+  title: "Oh My Ghost — AI-Powered Ghost SVG Generation",
   description:
-    "Generate professional SVG logos instantly with AI. Choose from battle-tested styles, describe your brand, get a pixel-perfect vector. Pay per request with x402.",
+    "Generate custom ghost SVGs instantly with AI. Choose from 10 unique styles, customize colors, and download production-ready vectors. Pay per request with x402.",
   keywords: [
-    "SVG logo",
-    "logo generation",
-    "AI logo",
-    "vector logo",
+    "ghost SVG",
+    "SVG generation",
+    "AI ghost",
+    "vector ghost",
     "x402",
-    "pimpmysvg",
+    "omghost",
     "API-first",
   ],
+  icons: {
+    icon: "/favicon.svg",
+  },
   openGraph: {
-    title: "Pimp My SVG — AI-Powered SVG Logo Generation",
+    title: "Oh My Ghost — AI-Powered Ghost SVG Generation",
     description:
-      "Professional SVG logos in seconds. Battle-tested styles, pay-per-request with x402.",
+      "Custom ghost SVGs in seconds. 10 unique styles, pay-per-request with x402.",
     type: "website",
-    url: "https://pimpmysvg.xyz",
+    url: "https://omghost.xyz",
   },
 };
 
@@ -38,7 +41,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
           rel="stylesheet"
         />
       </head>

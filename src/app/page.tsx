@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import GhostStudio from "./ghost-studio";
 
 const COLORS = [
   "#EBEBEB",
@@ -15,77 +16,18 @@ const LOGO_PRICE = "$0.30";
 const BATCH_PRICE = "$2.40";
 const BATCH_COUNT = 10;
 
-const STYLES = [
-  {
-    name: "Pixel Icons",
-    description:
-      "Chunky, retro pixel-art icons with vivid diagonal gradients on a black canvas.",
-    bgColor: "#EBEBEB",
-    svgHtml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" class="w-full h-full"><rect width="160" height="160" fill="#EBEBEB"/><rect x="50" y="70" width="10" height="10" fill="#000"/><rect x="60" y="70" width="10" height="10" fill="#000"/><rect x="70" y="70" width="10" height="10" fill="#000"/><rect x="80" y="70" width="10" height="10" fill="#000"/><rect x="90" y="70" width="10" height="10" fill="#000"/><rect x="40" y="80" width="10" height="10" fill="#000"/><rect x="50" y="80" width="10" height="10" fill="#000"/><rect x="60" y="80" width="10" height="10" fill="#000"/><rect x="70" y="80" width="10" height="10" fill="#000"/><rect x="80" y="80" width="10" height="10" fill="#000"/><rect x="90" y="80" width="10" height="10" fill="#000"/><rect x="100" y="80" width="10" height="10" fill="#000"/><rect x="40" y="90" width="10" height="10" fill="#000"/><rect x="50" y="90" width="10" height="10" fill="#000"/><rect x="60" y="90" width="10" height="10" fill="#000"/><rect x="70" y="90" width="10" height="10" fill="#000"/><rect x="80" y="90" width="10" height="10" fill="#000"/><rect x="90" y="90" width="10" height="10" fill="#000"/><rect x="100" y="90" width="10" height="10" fill="#000"/><rect x="40" y="100" width="10" height="10" fill="#000"/><rect x="50" y="100" width="10" height="10" fill="#000"/><rect x="60" y="100" width="10" height="10" fill="#000"/><rect x="70" y="100" width="10" height="10" fill="#000"/><rect x="80" y="100" width="10" height="10" fill="#000"/><rect x="90" y="100" width="10" height="10" fill="#000"/><rect x="100" y="100" width="10" height="10" fill="#000"/><rect x="50" y="110" width="10" height="10" fill="#000"/><rect x="60" y="110" width="10" height="10" fill="#000"/><rect x="70" y="110" width="10" height="10" fill="#000"/><rect x="80" y="110" width="10" height="10" fill="#000"/><rect x="90" y="110" width="10" height="10" fill="#000"/><rect x="110" y="80" width="10" height="10" fill="#000"/><rect x="120" y="90" width="10" height="10" fill="#000"/><rect x="120" y="100" width="10" height="10" fill="#000"/><rect x="110" y="110" width="10" height="10" fill="#000"/><rect x="100" y="110" width="10" height="10" fill="#000"/><rect x="60" y="30" width="10" height="10" fill="#000"/><rect x="60" y="40" width="10" height="10" fill="#000"/><rect x="70" y="20" width="10" height="10" fill="#000"/><rect x="70" y="30" width="10" height="10" fill="#000"/><rect x="80" y="30" width="10" height="10" fill="#000"/><rect x="80" y="40" width="10" height="10" fill="#000"/></svg>`,
-  },
-  {
-    name: "Neon Solid",
-    description:
-      "Bold gradient-filled icons with negative-space details on solid black.",
-    bgColor: "#000000",
-    svgHtml: null,
-  },
-  {
-    name: "Minimalist Two-Tone",
-    description:
-      "Bold circles with graphic cutout symbols in a single saturated color on black.",
-    bgColor: "#000000",
-    svgHtml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250" class="w-full h-full"><rect width="250" height="250" fill="#000000"/><g transform="translate(25, 25)"><circle cx="100" cy="100" r="100" fill="#CCFF00"/><path d="M100,10 Q105,95 190,100 Q105,105 100,190 Q95,105 10,100 Q95,95 100,10Z" fill="#000000"/></g></svg>`,
-  },
-  {
-    name: "FUI",
-    description:
-      "Sci-fi HUD-style icons with technical arcs, crosshairs, and angular stroke geometry.",
-    bgColor: "#000000",
-    svgHtml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-full h-full" fill="none"><rect width="64" height="64" fill="#000"/><circle cx="32" cy="32" r="26" stroke="#00FFD1" stroke-width="1" stroke-dasharray="2, 4" opacity="0.3" /><path d="M12 4H4v8M52 4h8v8M12 60H4v-8M52 60h8v-8" stroke="#00FFD1" stroke-width="1.5" stroke-linecap="square" /><path d="M32 12 A20 20 0 0 1 52 32" stroke="#00FFD1" stroke-width="2" stroke-linecap="butt" /><path d="M32 52 A20 20 0 0 1 12 32" stroke="#00FFD1" stroke-width="2" stroke-linecap="butt" /><circle cx="32" cy="32" r="14" stroke="#00FFD1" stroke-width="1" stroke-dasharray="8, 3" opacity="0.6" /><line x1="32" y1="28" x2="32" y2="36" stroke="#00FFD1" stroke-width="1.5" /><line x1="28" y1="32" x2="36" y2="32" stroke="#00FFD1" stroke-width="1.5" /><line x1="32" y1="8" x2="32" y2="10" stroke="#00FFD1" stroke-width="1.5" /><line x1="32" y1="54" x2="32" y2="56" stroke="#00FFD1" stroke-width="1.5" /><line x1="8" y1="32" x2="10" y2="32" stroke="#00FFD1" stroke-width="1.5" /><line x1="54" y1="32" x2="56" y2="32" stroke="#00FFD1" stroke-width="1.5" /><polyline points="22,22 32,32 42,22" stroke="#00FFD1" stroke-width="1" opacity="0.8" /></svg>`,
-  },
-  {
-    name: "Dotmatrix",
-    description:
-      "Retro LED-style icons built entirely from uniform dot grids on dark charcoal.",
-    bgColor: "#1a1a1a",
-    svgHtml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" class="w-full h-full"><rect width="160" height="160" fill="#1a1a1a"/><g fill="#FFFFFF"><circle cx="55" cy="25" r="3.5" /><circle cx="65" cy="25" r="3.5" /><circle cx="95" cy="25" r="3.5" /><circle cx="105" cy="25" r="3.5" /><circle cx="45" cy="35" r="3.5" /><circle cx="55" cy="35" r="3.5" /><circle cx="65" cy="35" r="3.5" /><circle cx="75" cy="35" r="3.5" /><circle cx="85" cy="35" r="3.5" /><circle cx="95" cy="35" r="3.5" /><circle cx="105" cy="35" r="3.5" /><circle cx="115" cy="35" r="3.5" /><circle cx="45" cy="45" r="3.5" /><circle cx="55" cy="45" r="3.5" /><circle cx="65" cy="45" r="3.5" /><circle cx="75" cy="45" r="3.5" /><circle cx="85" cy="45" r="3.5" /><circle cx="95" cy="45" r="3.5" /><circle cx="105" cy="45" r="3.5" /><circle cx="115" cy="45" r="3.5" /><circle cx="55" cy="55" r="3.5" /><circle cx="65" cy="55" r="3.5" /><circle cx="75" cy="55" r="3.5" /><circle cx="85" cy="55" r="3.5" /><circle cx="95" cy="55" r="3.5" /><circle cx="105" cy="55" r="3.5" /><circle cx="55" cy="65" r="3.5" /><circle cx="65" cy="65" r="3.5" /><circle cx="75" cy="65" r="3.5" /><circle cx="85" cy="65" r="3.5" /><circle cx="95" cy="65" r="3.5" /><circle cx="105" cy="65" r="3.5" /><circle cx="65" cy="75" r="3.5" /><circle cx="75" cy="75" r="3.5" /><circle cx="85" cy="75" r="3.5" /><circle cx="95" cy="75" r="3.5" /><circle cx="65" cy="85" r="3.5" /><circle cx="75" cy="85" r="3.5" /><circle cx="85" cy="85" r="3.5" /><circle cx="95" cy="85" r="3.5" /><circle cx="75" cy="95" r="3.5" /><circle cx="85" cy="95" r="3.5" /><circle cx="75" cy="105" r="3.5" /><circle cx="85" cy="105" r="3.5" /></g></svg>`,
-  },
-  {
-    name: "Colorblock Badge",
-    description:
-      "Bold flat icons on vivid color-blocked square backgrounds with strong contrast.",
-    bgColor: "#A0C4FF",
-    svgHtml: `<svg viewBox="0 0 64 64" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#1e40af"/><path d="M32 14C32 14 46 18 46 28V38C46 44 32 50 32 50C32 50 18 44 18 38V28C18 18 32 14 32 14Z" fill="#fff"/><path d="M26 33L30 37L38 29" stroke="#1e40af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  },
-  {
-    name: "Glassmorphism",
-    description:
-      "Frosted-glass layered icons with translucent panels and soft rounded strokes.",
-    bgColor: "#0F1118",
-    svgHtml: `<svg viewBox="0 0 64 64" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#0F1118"/><circle cx="20" cy="44" r="10" fill="#3D4A70" fill-opacity="0.06"/><rect x="8" y="8" width="48" height="48" rx="10" fill="#FFFFFF" fill-opacity="0.15" stroke="#C0D8FF" stroke-width="1.2" stroke-opacity="0.6"/><rect x="12" y="12" width="40" height="40" rx="8" fill="#FFFFFF" fill-opacity="0.08"/><rect x="14" y="10" width="36" height="2" rx="1" fill="#FFFFFF" fill-opacity="0.12"/><path d="M32 25C28.134 25 25 28.134 25 32C25 35.866 28.134 39 32 39C35.866 39 39 35.866 39 32C39 28.134 35.866 25 32 25ZM32 19L32 22M32 42L32 45M41.1924 22.8076L39.0711 24.9289M24.9289 39.0711L22.8076 41.1924M45 32H42M22 32H19M41.1924 41.1924L39.0711 39.0711M24.9289 24.9289L22.8076 22.8076" stroke="#A8CFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  },
-  {
-    name: "Neon Glow / Cyberpunk",
-    description:
-      "Vivid neon-tube stroke icons with glowing halos on deep black backgrounds.",
-    bgColor: "#050510",
-    svgHtml: `<svg viewBox="0 0 64 64" class="w-full h-full" xmlns="http://www.w3.org/2000/svg"><defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect width="64" height="64" fill="#050510"/><g filter="url(#glow)" stroke="#00AAFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="32" cy="32" r="28" /><circle cx="32" cy="32" r="1" /><path d="M 32,8 L 40,32 L 32,56 L 24,32 Z" /><line x1="10" y1="10" x2="16" y2="16" /><line x1="54" y1="10" x2="48" y2="16" /><line x1="10" y1="54" x2="16" y2="48" /><line x1="54" y1="54" x2="48" y2="48" /></g></svg>`,
-  },
-];
+const API_SNIPPET = `// 1. List available ghost styles
+const styles = await fetch("https://api.omghost.xyz/styles");
 
-const API_SNIPPET = `// 1. List available styles
-const styles = await fetch("https://api.pimpmysvg.xyz/styles");
-
-// 2. Generate your SVG icon
-const res = await fetch("https://api.pimpmysvg.xyz/generate", {
+// 2. Generate your ghost SVG
+const res = await fetch("https://api.omghost.xyz/generate", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
     "X-402-Payment": payment_token
   },
   body: JSON.stringify({
-    style: "fui",
+    style: "classic",
     brand: "My Startup",
     voice: "modern, bold, tech-forward"
   })
@@ -95,13 +37,26 @@ const { svg, token } = await res.json();
 // token lets you re-download or leave a review later
 
 // 3. Re-download anytime
-const asset = await fetch(\`https://api.pimpmysvg.xyz/asset/\${token}\`);
+const asset = await fetch(\`https://api.omghost.xyz/asset/\${token}\`);
 
 // 4. Review & earn up to 30% back
-await fetch("https://api.pimpmysvg.xyz/rate", {
+await fetch("https://api.omghost.xyz/rate", {
   method: "POST",
   body: JSON.stringify({ token, rating: 5, feedback: "Perfect!" })
 });`;
+
+function GhostLogo({ color, size = 32 }: { color: string; size?: number }) {
+  return (
+    <svg viewBox="0 0 200 200" fill="none" width={size} height={size}>
+      <path
+        d="M100 12 C60 12 28 42 28 85 L28 155 C28 162 32 165 36 160 Q44 148 52 156 Q60 164 68 156 Q76 148 84 156 Q92 164 100 156 Q108 164 116 156 Q124 148 132 156 Q140 164 148 156 Q156 148 164 160 C168 165 172 162 172 155 L172 85 C172 42 140 12 100 12Z"
+        fill={color}
+      />
+      <ellipse cx="76" cy="88" rx="16" ry="20" fill="black" />
+      <ellipse cx="124" cy="88" rx="16" ry="20" fill="black" />
+    </svg>
+  );
+}
 
 function ColorSwitcher({
   colors,
@@ -150,19 +105,22 @@ export default function Home() {
         }}
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <span className="font-black text-lg tracking-tight">
-            Pimp My SVG
-          </span>
+          <div className="flex items-center gap-3">
+            <GhostLogo color={fg} size={28} />
+            <span className="font-black text-lg tracking-tight">
+              Oh My Ghost
+            </span>
+          </div>
           <div className="flex items-center gap-6">
             <div
               className="hidden sm:flex items-center gap-6 text-sm font-medium"
               style={{ color: `${fg}99` }}
             >
               <a
-                href="#styles"
+                href="#studio"
                 className="hover:opacity-100 transition-opacity"
               >
-                Styles
+                Studio
               </a>
               <a
                 href="#pricing"
@@ -200,97 +158,45 @@ export default function Home() {
             Powered by x402 micropayments
           </div>
 
+          {/* Hero ghost logo */}
+          <div className="flex justify-center mb-8">
+            <div className="relative">
+              <div
+                className="absolute inset-0 blur-3xl opacity-20 rounded-full"
+                style={{ backgroundColor: fg }}
+              />
+              <GhostLogo color={fg} size={140} />
+            </div>
+          </div>
+
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] mb-6">
-            Instant SVG Icons
-            <br />
-            <span style={{ color: fg, opacity: 0.6 }}>via API</span>
+            Oh My Ghost
           </h1>
 
           <p
             className="text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
             style={{ color: `${fg}80` }}
           >
-            Professional vector icons in seconds. Choose from 8 hand-crafted
-            styles — pixel art, neon glow, FUI, glassmorphism, and more. Pay per
-            request with x402 micropayments.
+            Generate custom ghost SVGs instantly. 10 unique styles to choose
+            from — classic, pixel, drip, haunted, and more. Design your perfect
+            ghost in the studio or generate via API.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="#api"
+              href="#studio"
               className="px-8 py-4 font-bold rounded-xl text-black text-lg transition-opacity hover:opacity-90"
               style={{ backgroundColor: fg }}
             >
-              Pimp My Icons
+              Open Ghost Studio
             </a>
             <a
-              href="#styles"
+              href="#api"
               className="px-8 py-4 font-bold rounded-xl border text-lg transition-opacity hover:opacity-80"
               style={{ borderColor: `${fg}30`, color: `${fg}99` }}
             >
-              See the Drip
+              View API
             </a>
-          </div>
-
-          {/* Hero visual — style grid preview */}
-          <div className="relative max-w-3xl mx-auto">
-            <div
-              className="absolute inset-0 rounded-3xl blur-3xl opacity-10"
-              style={{ backgroundColor: fg }}
-            />
-            <div
-              className="relative rounded-2xl p-6 sm:p-8 border"
-              style={{ borderColor: `${fg}20`, backgroundColor: `${fg}08` }}
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: `${fg}40` }}
-                />
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: `${fg}25` }}
-                />
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: `${fg}15` }}
-                />
-                <span
-                  className="ml-3 text-sm font-mono"
-                  style={{ color: `${fg}50` }}
-                >
-                  8 styles available
-                </span>
-              </div>
-              <div className="grid grid-cols-4 gap-3 py-4">
-                {STYLES.slice(0, 8).map((style) => (
-                  <div
-                    key={style.name}
-                    className="aspect-square rounded-lg overflow-hidden"
-                    style={{ backgroundColor: style.bgColor }}
-                  >
-                    {style.svgHtml ? (
-                      <div
-                        dangerouslySetInnerHTML={{ __html: style.svgHtml }}
-                        className="w-full h-full"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-yellow-400 to-green-400">
-                        <span className="text-white/60 text-xs font-mono">
-                          {style.name}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div
-                className="text-center text-sm font-mono"
-                style={{ color: `${fg}50` }}
-              >
-                Hand-crafted by Tam &mdash; 8 unique icon styles
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -299,34 +205,34 @@ export default function Home() {
       <section className="py-20 px-6" style={{ backgroundColor: `${fg}05` }}>
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Three Steps. Zero Hassle. All Drip.
+            Three Steps. Zero Hassle.
           </h2>
           <p
             className="text-center mb-16 text-lg"
             style={{ color: `${fg}70` }}
           >
-            No accounts. No waiting. Just icons.
+            No accounts. No waiting. Just ghosts.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 step: "01",
-                title: "Pick Your Flavor",
+                title: "Pick Your Style",
                 description:
-                  "Browse 8 hand-crafted icon styles — from retro pixel art to futuristic HUD interfaces.",
+                  "Choose from 10 ghost styles — classic, pixel, drip, haunted, minimal, and more.",
               },
               {
                 step: "02",
-                title: "Tell Us What You Want",
+                title: "Customize It",
                 description:
-                  "Tell us what you need — a rocket, a shield, a brain. Our AI generates it in your chosen style.",
+                  "Use the Ghost Studio to pick colors, adjust strokes, and preview your ghost in real time.",
               },
               {
                 step: "03",
-                title: "Grab Your SVG",
+                title: "Generate & Download",
                 description:
-                  "Receive a production-ready SVG icon instantly. Scales infinitely, works everywhere.",
+                  "Generate production-ready SVG ghosts via API. Scales infinitely, works everywhere.",
               },
             ].map((item) => (
               <div
@@ -350,78 +256,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Styles Showcase */}
-      <section id="styles" className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
+      {/* Ghost Studio */}
+      <section id="studio" className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            8 Styles. All Heat.
+            Ghost Studio
           </h2>
           <p
-            className="text-center mb-16 text-lg max-w-2xl mx-auto"
+            className="text-center mb-12 text-lg max-w-2xl mx-auto"
             style={{ color: `${fg}70` }}
           >
-            Each style has its own personality and system prompt. Pick the vibe
-            that fits your brand.
+            Design your perfect ghost. Pick a style, choose your colors, and see
+            it come to life in real time.
           </p>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STYLES.map((style) => (
-              <div
-                key={style.name}
-                className="group rounded-2xl border p-4 transition-all hover:border-opacity-40"
-                style={{ borderColor: `${fg}15` }}
-              >
-                <div
-                  className="w-full aspect-square rounded-xl overflow-hidden mb-4"
-                  style={{ backgroundColor: style.bgColor }}
-                >
-                  {style.svgHtml ? (
-                    <div
-                      dangerouslySetInnerHTML={{ __html: style.svgHtml }}
-                      className="w-full h-full"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-green-400 flex items-center justify-center">
-                      <svg
-                        viewBox="0 0 80 80"
-                        className="w-16 h-16 text-white/80"
-                      >
-                        <rect
-                          x="10"
-                          y="10"
-                          width="60"
-                          height="60"
-                          rx="12"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                        />
-                        <circle
-                          cx="40"
-                          cy="40"
-                          r="15"
-                          fill="currentColor"
-                          opacity="0.4"
-                        />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-bold text-sm">{style.name}</h3>
-                  <span
-                    className="text-xs font-mono font-semibold px-2 py-0.5 rounded"
-                    style={{ backgroundColor: `${fg}15`, color: fg }}
-                  >
-                    {LOGO_PRICE}
-                  </span>
-                </div>
-                <p className="text-xs leading-relaxed" style={{ color: `${fg}60` }}>
-                  {style.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <GhostStudio accentColor={fg} />
         </div>
       </section>
 
@@ -439,7 +287,7 @@ export default function Home() {
             className="text-center mb-16 text-lg max-w-2xl mx-auto"
             style={{ color: `${fg}70` }}
           >
-            No subscriptions. No credits to buy. Just pay for each icon with
+            No subscriptions. No credits to buy. Just pay for each ghost with
             x402 micropayments and get instant access.
           </p>
 
@@ -523,7 +371,7 @@ export default function Home() {
                 <div className="text-5xl font-extrabold mb-1">
                   {LOGO_PRICE}
                 </div>
-                <div style={{ color: `${fg}70` }}>per icon, any style</div>
+                <div style={{ color: `${fg}70` }}>per ghost, any style</div>
               </div>
               <div
                 className="mt-4 p-4 rounded-xl border"
@@ -568,14 +416,14 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-3">
-                Batch — {BATCH_COUNT} Icons
+                Batch — {BATCH_COUNT} Ghosts
               </h3>
               <div className="text-center py-6">
                 <div className="text-5xl font-extrabold mb-1">
                   {BATCH_PRICE}
                 </div>
                 <div style={{ color: `${fg}70` }}>
-                  for {BATCH_COUNT} icons (
+                  for {BATCH_COUNT} ghosts (
                   {`$${(2.4 / BATCH_COUNT).toFixed(2)}`}
                   /each)
                 </div>
@@ -617,17 +465,17 @@ export default function Home() {
               {
                 method: "GET",
                 path: "/styles",
-                desc: "Browse the drip",
+                desc: "Browse ghost styles",
               },
               {
                 method: "POST",
                 path: "/generate",
-                desc: "Mint your icon",
+                desc: "Create your ghost",
               },
               {
                 method: "GET",
                 path: "/asset/:token",
-                desc: "Grab it again",
+                desc: "Download again",
               },
               {
                 method: "POST",
@@ -731,13 +579,13 @@ export default function Home() {
             className="text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
             style={{ color: `${fg}70` }}
           >
-            Your feedback makes our icons better. Leave a review on any icon you
-            generate and get up to 30% back on your spend. Every review helps us
-            improve — and puts money back in your pocket.
+            Your feedback makes our ghosts better. Leave a review on any ghost
+            you generate and get up to 30% back on your spend. Every review
+            helps us improve — and puts money back in your pocket.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             {[
-              "Get your icon",
+              "Get your ghost",
               "Drop a rating (be honest)",
               "Collect up to 30% back",
             ].map((step, i) => (
@@ -762,8 +610,11 @@ export default function Home() {
       {/* CTA */}
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center">
+          <div className="flex justify-center mb-8">
+            <GhostLogo color={fg} size={80} />
+          </div>
           <h2 className="text-4xl sm:text-5xl font-black mb-6">
-            Your Next Icon is One
+            Your Next Ghost is One
             <br />
             <span style={{ opacity: 0.6 }}>API Call Away</span>
           </h2>
@@ -775,7 +626,7 @@ export default function Home() {
             className="inline-flex px-10 py-5 font-bold rounded-xl text-black text-lg transition-opacity hover:opacity-90"
             style={{ backgroundColor: fg }}
           >
-            Pimp My Icons Now
+            Generate Ghosts Now
           </a>
         </div>
       </section>
@@ -786,9 +637,12 @@ export default function Home() {
         style={{ borderColor: `${fg}15` }}
       >
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-bold text-sm">Pimp My SVG</span>
+          <div className="flex items-center gap-2">
+            <GhostLogo color={fg} size={20} />
+            <span className="font-bold text-sm">Oh My Ghost</span>
+          </div>
           <p className="text-sm" style={{ color: `${fg}40` }}>
-            pimpmysvg.xyz — Pay-per-use SVG icon generation via x402.
+            omghost.xyz — Pay-per-use ghost SVG generation via x402.
           </p>
         </div>
       </footer>
