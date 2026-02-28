@@ -413,6 +413,19 @@ function HexColorPicker({ color, onChange, size = 200 }: { color: string; onChan
   );
 }
 
+/* ── useIsMobile hook ─────────────────────────────── */
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    setIsMobile(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 /* ── Ghost Studio App ─────────────────────────────── */
 export default function GhostStudio() {
   const [styleIdx, setStyleIdx] = useState(0);
@@ -421,6 +434,8 @@ export default function GhostStudio() {
   const [bgColor, setBgColor] = useState("#0e0e0e");
   const [activeTarget, setActiveTarget] = useState<"ghost" | "eye" | "bg">("ghost");
   const [strokeWidth, setStrokeWidth] = useState(0);
+  const [mobilePanel, setMobilePanel] = useState<"preview" | "controls">("preview");
+  const isMobile = useIsMobile();
 
   const activeStyle = STYLES[styleIdx];
   const targetColors = { ghost: ghostColor, eye: eyeColor, bg: bgColor };
@@ -449,6 +464,155 @@ export default function GhostStudio() {
 
   const labelStyle: React.CSSProperties = { fontFamily: "'Inter', sans-serif", fontSize: 9, color: "#555", letterSpacing: "0.14em", textTransform: "uppercase" };
 
+  /* ── Mobile Layout ─────────────────────────────── */
+  if (isMobile) {
+    return (
+      <div style={{ background: "#0e0e0e", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "'Inter', sans-serif" }}>
+        <style>{`
+          .gs-arrow-btn { width:36px; height:36px; border-radius:50%; border:1.5px solid #333; background:transparent; color:#888; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:all 0.18s; }
+          .gs-arrow-btn:hover { border-color:#fff; color:#fff; }
+          .gs-swatch { width:22px; height:22px; border-radius:5px; cursor:pointer; flex-shrink:0; transition:transform 0.15s; }
+          .gs-target-btn { padding:6px 10px; border-radius:5px; border:1.5px solid transparent; cursor:pointer; font-family:'Inter', sans-serif; font-size:10px; font-weight:700; letter-spacing:0.06em; transition:all 0.18s; flex:1; background:transparent; color:#666; }
+          .gs-target-btn.active { border-color:#fff; background:rgba(255,255,255,0.08); color:#fff; }
+          .gs-target-btn:not(.active) { border-color:#2a2a2a; }
+          .gs-style-dot { width:7px; height:7px; border-radius:50%; background:#333; cursor:pointer; transition:all 0.2s; flex-shrink:0; }
+          .gs-style-dot.active { background:#fff; transform:scale(1.4); }
+          @keyframes ghostIn { from { opacity:0; transform:scale(0.88) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+          .ghost-anim { animation:ghostIn 0.28s cubic-bezier(0.34,1.56,0.64,1); }
+          .gs-panel input[type=range] { -webkit-appearance:none; appearance:none; background:transparent; }
+          .gs-panel input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#fff; cursor:pointer; border:2px solid #333; }
+          .gs-randomize { width:100%; padding:10px 14px; border-radius:8px; border:1.5px solid rgba(232,255,79,0.3); background:rgba(232,255,79,0.06); color:#e8ff4f; font-family:'Inter',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+          .gs-tab-btn { flex:1; padding:10px; border:none; font-family:'Inter',sans-serif; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+          .gs-tab-btn.active { background:rgba(232,255,79,0.08); color:#e8ff4f; border-bottom:2px solid #e8ff4f; }
+          .gs-tab-btn:not(.active) { background:#0a0a0a; color:#555; border-bottom:2px solid transparent; }
+        `}</style>
+
+        {/* Header */}
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid #1e1e1e", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#0a0a0a" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: "0.12em" }}>GHOST STUDIO</span>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#00e5a0", boxShadow: "0 0 8px #00e5a0" }} />
+            <span style={{ fontSize: 8, color: "#555", letterSpacing: "0.08em" }}>LIVE</span>
+          </div>
+        </div>
+
+        {/* Tab switcher */}
+        <div style={{ display: "flex", borderBottom: "1px solid #1e1e1e" }}>
+          <button className={`gs-tab-btn${mobilePanel === "preview" ? " active" : ""}`} onClick={() => setMobilePanel("preview")}>Preview</button>
+          <button className={`gs-tab-btn${mobilePanel === "controls" ? " active" : ""}`} onClick={() => setMobilePanel("controls")}>Customize</button>
+        </div>
+
+        {mobilePanel === "preview" ? (
+          <>
+            {/* Preview */}
+            <div style={{ height: 280, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: bgColor, position: "relative", transition: "background 0.3s" }}>
+              <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(rgba(0,0,0,0.6) 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
+              <div key={styleIdx} className="ghost-anim" style={{ width: 160, height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {activeStyle.render(ghostProps)}
+              </div>
+              <p style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", letterSpacing: "0.14em", textTransform: "uppercase" as const, marginTop: 10 }}>
+                {activeStyle.name} &middot; {activeStyle.desc}
+              </p>
+            </div>
+
+            {/* Style navigation */}
+            <div style={{ padding: "12px 16px", borderTop: "1px solid #1e1e1e", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#0c0c0c" }}>
+              <button className="gs-arrow-btn" onClick={() => setStyleIdx(i => (i - 1 + STYLES.length) % STYLES.length)}>&lsaquo;</button>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", letterSpacing: "0.04em" }}>{activeStyle.name}</p>
+                <p style={{ fontSize: 9, color: "#666", marginTop: 2 }}>{styleIdx + 1} / {STYLES.length}</p>
+              </div>
+              <button className="gs-arrow-btn" onClick={() => setStyleIdx(i => (i + 1) % STYLES.length)}>&rsaquo;</button>
+            </div>
+
+            {/* Style dots */}
+            <div style={{ padding: "10px 16px", display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap", borderTop: "1px solid #1a1a1a", background: "#0c0c0c" }}>
+              {STYLES.map((s, i) => (
+                <div key={s.id} className={`gs-style-dot${i === styleIdx ? " active" : ""}`} onClick={() => setStyleIdx(i)} title={s.name} />
+              ))}
+            </div>
+
+            {/* Quick actions */}
+            <div style={{ padding: "12px 16px", background: "#0c0c0c", borderTop: "1px solid #1a1a1a" }}>
+              <button className="gs-randomize" onClick={randomizeColors}>
+                <span style={{ fontSize: 16 }}>&#127922;</span>
+                Randomize
+              </button>
+            </div>
+          </>
+        ) : (
+          /* Controls panel — scrollable */
+          <div className="gs-panel" style={{ overflowY: "auto", background: "#0c0c0c" }}>
+            {/* Color target */}
+            <div style={{ padding: "14px 16px", borderBottom: "1px solid #1a1a1a" }}>
+              <p style={{ ...labelStyle, marginBottom: 10 }}>EDIT COLOR</p>
+              <div style={{ display: "flex", gap: 6 }}>
+                {([
+                  { id: "ghost" as const, label: "GHOST", color: ghostColor },
+                  { id: "eye" as const, label: "EYES", color: eyeColor },
+                  { id: "bg" as const, label: "BG", color: bgColor },
+                ]).map(t => (
+                  <button key={t.id} className={`gs-target-btn${activeTarget === t.id ? " active" : ""}`} onClick={() => setActiveTarget(t.id)}>
+                    <div style={{ width: 8, height: 8, borderRadius: 2, background: t.color, margin: "0 auto 4px", border: "1px solid rgba(255,255,255,0.1)" }} />
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Color wheel */}
+            <div style={{ padding: "14px 16px", borderBottom: "1px solid #1a1a1a", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <HexColorPicker color={activeColor.length === 7 ? activeColor : "#888888"} onChange={setActiveColor} size={Math.min(280, typeof window !== "undefined" ? window.innerWidth - 64 : 280)} />
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, width: "100%" }}>
+                <div style={{ width: 24, height: 24, borderRadius: 5, background: activeColor, border: "1px solid #333", flexShrink: 0 }} />
+                <input
+                  value={activeColor}
+                  onChange={e => { const v = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(v)) setActiveColor(v); }}
+                  style={{ flex: 1, background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#fff", padding: "6px 10px", fontSize: 12, letterSpacing: "0.08em", outline: "none", borderRadius: 5, fontFamily: "'Inter', sans-serif" }}
+                />
+              </div>
+            </div>
+
+            {/* Presets */}
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid #1a1a1a" }}>
+              <p style={{ ...labelStyle, marginBottom: 8 }}>PRESETS</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {PRESETS.map(p => (
+                  <div
+                    key={p} className="gs-swatch"
+                    style={{ background: p, border: p === activeColor ? "2px solid #fff" : "2px solid #2a2a2a", width: 22, height: 22, borderRadius: 5 }}
+                    onClick={() => setActiveColor(p)} title={p}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Stroke */}
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid #1a1a1a" }}>
+              <p style={{ ...labelStyle, marginBottom: 10 }}>STROKE</p>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                  <span style={{ fontSize: 9, color: "#888" }}>Width</span>
+                  <span style={{ fontSize: 9, color: "#fff" }}>{strokeWidth}px</span>
+                </div>
+                <input type="range" min="0" max="12" step="0.5" value={strokeWidth} onChange={e => setStrokeWidth(parseFloat(e.target.value))} style={{ width: "100%", accentColor: "#fff" }} />
+              </div>
+            </div>
+
+            {/* Randomize */}
+            <div style={{ padding: "12px 16px" }}>
+              <button className="gs-randomize" onClick={randomizeColors}>
+                <span style={{ fontSize: 16 }}>&#127922;</span>
+                Randomize
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ── Desktop Layout (unchanged) ─────────────────── */
   return (
     <div style={{ height: 600, background: "#0e0e0e", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "'Inter', sans-serif" }}>
       <style>{`
