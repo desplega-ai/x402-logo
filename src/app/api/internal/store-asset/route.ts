@@ -8,8 +8,15 @@ import { prisma } from "@/lib/prisma";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { jobId, styleId, svg, brandName, brandVoice } =
-      await request.json();
+    const {
+      jobId,
+      styleId,
+      svg,
+      pngAsset,
+      vectorizeResponse,
+      brandName,
+      brandVoice,
+    } = await request.json();
 
     if (!jobId || !styleId || !svg) {
       return NextResponse.json(
@@ -21,6 +28,8 @@ export async function POST(request: NextRequest) {
     const asset = await prisma.asset.create({
       data: {
         asset: svg,
+        pngAsset: pngAsset ?? null,
+        vectorizeResponse: vectorizeResponse ?? undefined,
         styleId,
         brandName: brandName ?? null,
         brandVoice: brandVoice ?? null,

@@ -39,17 +39,19 @@ model Rate {
 }
 
 model Asset {
-  id        String   @id @default(cuid())
-  token     String   @unique @default(uuid())
-  asset     String   @db.Text
-  styleId   String   @map("style_id")
-  style     Style    @relation(fields: [styleId], references: [id])
-  brandName String?  @map("brand_name")
-  brandVoice String? @map("brand_voice")
-  jobId     String?  @unique @map("job_id")
-  job       GenerationJob? @relation(fields: [jobId], references: [id])
-  createdAt DateTime @default(now()) @db.Timestamptz
-  updatedAt DateTime @updatedAt @db.Timestamptz
+  id                String   @id @default(cuid())
+  token             String   @unique @default(uuid())
+  asset             String   @db.Text
+  pngAsset          String?  @db.Text @map("png_asset")
+  vectorizeResponse Json?    @map("vectorize_response")
+  styleId           String   @map("style_id")
+  style             Style    @relation(fields: [styleId], references: [id])
+  brandName         String?  @map("brand_name")
+  brandVoice        String?  @map("brand_voice")
+  jobId             String?  @unique @map("job_id")
+  job               GenerationJob? @relation(fields: [jobId], references: [id])
+  createdAt         DateTime @default(now()) @db.Timestamptz
+  updatedAt         DateTime @updatedAt @db.Timestamptz
 
   @@index([styleId])
   @@map("assets")
