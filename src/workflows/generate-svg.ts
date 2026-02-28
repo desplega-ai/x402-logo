@@ -10,8 +10,8 @@ function getBaseUrl(): string {
   return `http://localhost:${process.env.PORT || 3000}`;
 }
 
-// Step 1: Call OpenRouter to generate SVG
-async function callOpenRouter(
+// Step 1: Generate PNG via OpenRouter (Gemini image generation)
+async function generatePng(
   styleName: string,
   systemPrompt: string,
   svgExamples: string[],
@@ -20,35 +20,20 @@ async function callOpenRouter(
 ) {
   "use step";
 
-  const OpenAI = (await import("openai")).default;
-  const openrouter = new OpenAI({
-    apiKey: process.env.OPENROUTER_API_KEY,
-    baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: {
-      "HTTP-Referer": "https://pimpmysvg.xyz",
-      "X-Title": "Pimp My SVG",
-    },
-  });
-
-  // Build system prompt:
-  // 1. Universal SVG constraints + single-SVG explanation
-  // 2. Request parameters header
-  // 3. Style-specific guide
-  // 4. Few-shot examples
+  // Build system prompt for image generation (adapted from SVG version)
   const parts: string[] = [];
 
-  parts.push(`You are an expert SVG icon designer. Your task is to generate a single, clean, valid, production-ready SVG icon.
+  parts.push(`You are an expert logo and icon designer. Your task is to generate a single, clean, production-ready logo image.
 
 OUTPUT RULES:
-- Respond ONLY with a JSON object containing an "svg" key whose value is the complete SVG markup.
-- The SVG must be valid, well-formed, self-contained XML that renders in any modern browser.
-- No external fonts, no external images, no embedded JavaScript.
-- Always include xmlns="http://www.w3.org/2000/svg" and a viewBox attribute.
-- Place gradients, clipPaths, and filters inside a <defs> section.
-- Keep the design simple and geometric — the logo must be legible at 16px (favicon size).
-- Do NOT include any text outside the JSON object. No markdown, no explanation.
+- Generate exactly ONE logo/icon image.
+- The logo should be simple, geometric, and instantly recognizable.
+- It must be legible at small sizes (favicon, 64×64).
+- Use bold, clear shapes — avoid excessive detail or photorealism.
+- No text in the image unless the brand name is short (≤5 chars) and explicitly requested.
+- Transparent or solid background (prefer transparent).
 
-WHY A SINGLE SVG: This API generates one logo per request. The customer pays per generation and expects exactly one cohesive SVG icon that captures their brand. Multiple SVGs would break the rendering pipeline and billing. Always produce exactly one <svg>...</svg> element inside the JSON.`);
+WHY A SINGLE IMAGE: This API generates one logo per request. The customer pays per generation and expects exactly one cohesive icon that captures their brand.`);
 
   parts.push(`--- REQUEST PARAMETERS ---
 Style: ${styleName}
@@ -61,92 +46,172 @@ ${systemPrompt}
 --- END STYLE GUIDE ---`);
 
   if (svgExamples.length > 0) {
-    parts.push(`--- REFERENCE EXAMPLES ---
-The following are example SVGs in the "${styleName}" style. Use them as visual references for the aesthetic, but create an original design for the brand.
-
-${svgExamples.map((ex: string, i: number) => `Example ${i + 1}:\n${ex}`).join("\n\n")}
+    parts.push(`--- REFERENCE EXAMPLES (for style reference only) ---
+The following are example designs in the "${styleName}" style. Use them as visual references for the aesthetic, but create an original design for the brand.
 --- END EXAMPLES ---`);
   }
 
   const fullSystemPrompt = parts.join("\n\n");
 
   const userLines: string[] = [
-    `Generate a single SVG icon for: ${brandName || "a generic icon"}`,
+    `Generate a single logo icon image for: ${brandName || "a generic icon"}`,
+    `Style: ${styleName}`,
   ];
   if (brandVoice) {
     userLines.push(`Brand voice/personality: ${brandVoice}`);
   }
   userLines.push(
-    `\nRemember: respond with ONLY a JSON object like {"svg": "<svg ...>...</svg>"}`
+    `\nGenerate the image now. Do not describe it — produce the actual image.`
   );
   const userPrompt = userLines.join("\n");
 
   const model =
     process.env.OPENROUTER_MODEL || "google/gemini-3.1-flash-image-preview";
 
-  const response = await openrouter.chat.completions.create({
-    model,
-    messages: [
-      { role: "system", content: fullSystemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-    response_format: {
-      type: "json_schema" as const,
-      json_schema: {
-        name: "svg_output",
-        strict: true,
-        schema: {
-          type: "object",
-          properties: {
-            svg: {
-              type: "string",
-              description:
-                "Complete SVG markup starting with <svg and ending with </svg>",
-            },
-          },
-          required: ["svg"],
-          additionalProperties: false,
-        },
-      },
+  // Use fetch directly to handle OpenRouter's non-standard image response format
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      "HTTP-Referer": "https://pimpmysvg.xyz",
+      "X-Title": "Pimp My SVG",
+      "Content-Type": "application/json",
     },
-    max_tokens: 8192,
-    temperature: 0.7,
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: fullSystemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      modalities: ["image", "text"],
+      max_tokens: 8192,
+      temperature: 0.7,
+    }),
   });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `OpenRouter API error ${response.status}: ${errorText.slice(0, 500)}`
+    );
+  }
+
+  const data = await response.json();
+  const message = data.choices?.[0]?.message;
+  if (!message) {
     throw new Error("Empty response from OpenRouter API");
   }
 
-  // Try JSON parse (structured output path)
-  try {
-    const result = JSON.parse(content);
-    if (
-      result.svg &&
-      typeof result.svg === "string" &&
-      result.svg.includes("<svg")
-    ) {
-      return result.svg as string;
-    }
-  } catch {
-    // Fall through to regex
+  // OpenRouter returns images in a non-standard `images` array on the message
+  // Format: message.images[].image_url.url = "data:image/png;base64,..."
+  const images = message.images as
+    | Array<{ type?: string; image_url: { url: string } }>
+    | undefined;
+
+  if (!images || images.length === 0) {
+    throw new FatalError(
+      "OpenRouter returned no images. Check that the model supports image generation and modalities is set."
+    );
   }
 
-  // Fallback: extract SVG from raw output
-  const match = content.match(/<svg[\s\S]*?<\/svg>/);
-  if (match) {
-    return match[0];
+  const dataUri = images[0].image_url.url;
+  if (!dataUri || !dataUri.startsWith("data:image/")) {
+    throw new FatalError(
+      `Unexpected image format from OpenRouter: ${dataUri?.slice(0, 100)}`
+    );
   }
 
-  throw new FatalError("Failed to extract valid SVG from model response");
+  // Extract base64 data from data URI ("data:image/png;base64,...")
+  const base64Data = dataUri.split(",")[1];
+  if (!base64Data) {
+    throw new FatalError("Failed to extract base64 data from image data URI");
+  }
+
+  return base64Data;
 }
 
-// Step 2: Store the generated asset via internal API endpoint
+// Step 2: Vectorize PNG to SVG via Runware API
+async function vectorizePng(pngBase64: string) {
+  "use step";
+
+  const apiKey = process.env.RUNWARE_API_KEY;
+  if (!apiKey) {
+    throw new FatalError("RUNWARE_API_KEY environment variable is required");
+  }
+
+  const taskUUID = crypto.randomUUID();
+
+  const response = await fetch("https://api.runware.ai/v1", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify([
+      {
+        taskType: "vectorize",
+        taskUUID,
+        model: "recraft:1@1",
+        outputType: "URL",
+        outputFormat: "SVG",
+        includeCost: true,
+        inputs: {
+          image: pngBase64,
+        },
+      },
+    ]),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Runware API error ${response.status}: ${errorText.slice(0, 500)}`
+    );
+  }
+
+  const apiResponse = await response.json();
+  const resultData = apiResponse.data;
+
+  if (!resultData || !Array.isArray(resultData) || resultData.length === 0) {
+    throw new Error(
+      `Runware API returned empty data: ${JSON.stringify(apiResponse).slice(0, 500)}`
+    );
+  }
+
+  const imageURL = resultData[0].imageURL;
+  if (!imageURL) {
+    throw new Error(
+      `Runware API response missing imageURL: ${JSON.stringify(resultData[0]).slice(0, 500)}`
+    );
+  }
+
+  // Download the SVG from the returned URL
+  const svgResponse = await fetch(imageURL);
+  if (!svgResponse.ok) {
+    throw new Error(
+      `Failed to download SVG from Runware: ${svgResponse.status}`
+    );
+  }
+
+  const svg = await svgResponse.text();
+
+  if (!svg.includes("<svg")) {
+    throw new FatalError(
+      `Downloaded content is not a valid SVG: ${svg.slice(0, 200)}`
+    );
+  }
+
+  return { svg, vectorizeResponse: apiResponse };
+}
+
+// Step 3: Store both PNG and SVG assets via internal API endpoint
 // (Prisma uses Node.js modules which aren't available in workflow steps)
-async function storeAsset(
+async function storeAssets(
   jobId: string,
   styleId: string,
   svg: string,
+  pngBase64: string,
+  vectorizeResponse: unknown,
   brandName: string | null,
   brandVoice: string | null
 ) {
@@ -156,7 +221,15 @@ async function storeAsset(
   const res = await fetch(`${baseUrl}/api/internal/store-asset`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ jobId, styleId, svg, brandName, brandVoice }),
+    body: JSON.stringify({
+      jobId,
+      styleId,
+      svg,
+      pngAsset: pngBase64,
+      vectorizeResponse,
+      brandName,
+      brandVoice,
+    }),
   });
 
   if (!res.ok) {
@@ -168,7 +241,7 @@ async function storeAsset(
   return { token: data.token as string };
 }
 
-// Step 3: Mark job as failed via internal API
+// Step 4: Mark job as failed via internal API
 async function markJobFailed(jobId: string, errorMessage: string) {
   "use step";
 
@@ -180,7 +253,7 @@ async function markJobFailed(jobId: string, errorMessage: string) {
   }).catch(() => {}); // Best-effort
 }
 
-// Main workflow
+// Main workflow: PNG generation → Runware vectorization → store both
 export async function generateSvgWorkflow(
   jobId: string,
   styleId: string,
@@ -193,7 +266,8 @@ export async function generateSvgWorkflow(
   "use workflow";
 
   try {
-    const svg = await callOpenRouter(
+    // Step 1: Generate PNG via Gemini
+    const pngBase64 = await generatePng(
       styleName,
       systemPrompt,
       svgExamples,
@@ -201,10 +275,16 @@ export async function generateSvgWorkflow(
       brandVoice
     );
 
-    const { token } = await storeAsset(
+    // Step 2: Vectorize PNG to SVG via Runware
+    const { svg, vectorizeResponse } = await vectorizePng(pngBase64);
+
+    // Step 3: Store both PNG and SVG
+    const { token } = await storeAssets(
       jobId,
       styleId,
       svg,
+      pngBase64,
+      vectorizeResponse,
       brandName,
       brandVoice
     );
