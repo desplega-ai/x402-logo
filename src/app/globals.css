@@ -712,6 +712,13 @@ body {
   color: var(--white);
   letter-spacing: 0.05em;
   animation: ghostWobble 8s ease-in-out 4s infinite;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-logo .logo-ghost {
+  width: 28px;
+  height: 28px;
 }
 .footer-tagline {
   font-family: var(--mono);

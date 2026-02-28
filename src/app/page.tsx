@@ -80,26 +80,23 @@ export default function Home() {
 
       {/* ── NAV ────────────────────────────────────── */}
       <nav className="omg-nav">
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div className="nav-logo">
-            <svg className="logo-ghost" viewBox="0 0 200 220" fill="none">
-              <path d="M100 20 C55 20 30 55 30 95 L30 185 L50 165 L70 185 L90 165 L110 185 L130 165 L150 185 L170 165 L170 95 C170 55 145 20 100 20Z" fill={accent} />
-              <ellipse cx="80" cy="95" rx="14" ry="17" fill="#0e0e0e" />
-              <ellipse cx="120" cy="95" rx="14" ry="17" fill="#0e0e0e" />
-            </svg>
-            OMGHOST
-            <span className="nav-badge">Beta</span>
-          </div>
-          <ColorSwitcher colors={ACCENT_COLORS} active={accent} onChange={setAccent} />
+        <div className="nav-logo">
+          <svg className="logo-ghost" viewBox="0 0 200 220" fill="none">
+            <path d="M100 20 C55 20 30 55 30 95 L30 185 L50 165 L70 185 L90 165 L110 185 L130 165 L150 185 L170 165 L170 95 C170 55 145 20 100 20Z" fill={accent} />
+            <ellipse cx="80" cy="95" rx="14" ry="17" fill="#0e0e0e" />
+            <ellipse cx="120" cy="95" rx="14" ry="17" fill="#0e0e0e" />
+          </svg>
+          OMGHOST
+          <span className="nav-badge">Beta</span>
         </div>
         <ul className="nav-links">
-          <li><a href="#api">API</a></li>
+          <li><a href="/docs">API</a></li>
           <li><a href="#styles">Styles</a></li>
           <li><a href="#pricing">Pricing</a></li>
           <li><a href="#studio">Studio</a></li>
           <li><a href="/docs">Docs</a></li>
         </ul>
-        <a className="nav-cta" href="#studio">Try the Studio</a>
+        <ColorSwitcher colors={ACCENT_COLORS} active={accent} onChange={setAccent} />
       </nav>
 
       {/* ── HERO ───────────────────────────────────── */}
@@ -111,7 +108,7 @@ export default function Home() {
         </h1>
         <p className="hero-subtitle">
           Professional vector icons in seconds. Choose from 11 hand-crafted ghost styles.
-          Pay $0.30 per icon with x402 micropayments. No subscriptions, no accounts.
+          Pay $0.10 per image with x402 micropayments. No subscriptions, no accounts.
         </p>
         <div className="hero-actions">
           <a href="#studio" className="btn-primary">Open Studio →</a>
@@ -124,8 +121,8 @@ export default function Home() {
           </div>
           <div className="stat-divider" />
           <div className="hero-stat">
-            <div className="hero-stat-num"><span>$</span>0.30</div>
-            <div className="hero-stat-label">Per Icon</div>
+            <div className="hero-stat-num"><span>$</span>0.10</div>
+            <div className="hero-stat-label">Per Image</div>
           </div>
           <div className="stat-divider" />
           <div className="hero-stat">
@@ -165,7 +162,7 @@ export default function Home() {
               <h2 className="section-title">One request.<br />Any icon.</h2>
               <p className="section-body">
                 Hit our REST endpoint with a style name and optional brand details. Get back a production-ready SVG.
-                No subscriptions &mdash; pay $0.30 per icon with x402 micropayments baked into the protocol.
+                No subscriptions &mdash; pay $0.10 per image with x402 micropayments baked into the protocol.
               </p>
               <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 28 }}>
                 <div className="api-feature">
@@ -179,7 +176,7 @@ export default function Home() {
                   <div className="api-feature-icon">💳</div>
                   <div>
                     <div className="api-feature-title">x402 micropayments</div>
-                    <div className="api-feature-body">Pay per icon with HTTP 402. No API keys, no quotas, no billing portals. $0.30 per request.</div>
+                    <div className="api-feature-body">Pay per image with HTTP 402. No API keys, no quotas, no billing portals. $0.10 per request.</div>
                   </div>
                 </div>
                 <div className="api-feature">
@@ -248,51 +245,24 @@ export default function Home() {
           <div className="section-kicker" style={{ textAlign: "center" }}>Pricing</div>
           <h2 className="section-title" style={{ textAlign: "center" }}>Pay for what<br />you use.</h2>
           <p className="section-body" style={{ margin: "0 auto", textAlign: "center", maxWidth: 480 }}>
-            No subscriptions. No annual commitments. x402 micropayments mean you pay exactly per icon generated.
+            No subscriptions. No annual commitments. x402 micropayments mean you pay exactly per image generated.
           </p>
 
-          <div className="pricing-grid">
-            <div className="pricing-card">
-              <div className="pricing-tier">x402 Protocol</div>
-              <div className="pricing-price">Free<sub> setup</sub></div>
-              <div className="pricing-detail">No accounts · No API keys</div>
-              <ul className="pricing-features">
-                <li>Open HTTP 402 protocol</li>
-                <li>Pay per request with crypto</li>
-                <li>No signup required</li>
-                <li>Works with any HTTP client</li>
-                <li>Instant settlement</li>
-              </ul>
-              <a href="/docs" className="pricing-btn pricing-btn-ghost">Read the Docs</a>
-            </div>
-
+          <div className="pricing-grid" style={{ maxWidth: 420, margin: "0 auto" }}>
             <div className="pricing-card featured">
               <div className="pricing-tag">Simple Pricing</div>
-              <div className="pricing-tier">Per Icon</div>
-              <div className="pricing-price">$0.30<sub>/icon</sub></div>
-              <div className="pricing-detail">Pay as you go · Any style</div>
+              <div className="pricing-tier">Per Image</div>
+              <div className="pricing-price">$0.10<sub>/image</sub></div>
+              <div className="pricing-detail">SVG &amp; PNG · Pay as you go</div>
               <ul className="pricing-features">
                 <li>All 11 ghost styles</li>
                 <li>AI-powered SVG generation</li>
                 <li>Full color customization</li>
-                <li>Production-ready output</li>
-                <li>Rate icons &amp; give feedback</li>
+                <li>Production-ready SVG &amp; PNG output</li>
+                <li>No accounts · No API keys</li>
+                <li>x402 micropayments · Instant settlement</li>
               </ul>
-              <a href="#studio" className="pricing-btn pricing-btn-filled">Try the Studio</a>
-            </div>
-
-            <div className="pricing-card">
-              <div className="pricing-tier">Enterprise</div>
-              <div className="pricing-price">Custom</div>
-              <div className="pricing-detail">Volume pricing · SLA included</div>
-              <ul className="pricing-features">
-                <li>Custom style training</li>
-                <li>Dedicated generation</li>
-                <li>Priority support</li>
-                <li>Volume discounts</li>
-                <li>SLA guarantee</li>
-              </ul>
-              <a href="mailto:hello@omghost.xyz" className="pricing-btn pricing-btn-ghost">Contact Us</a>
+              <a href="/docs" className="pricing-btn pricing-btn-filled">View API Docs</a>
             </div>
           </div>
         </div>
@@ -301,7 +271,14 @@ export default function Home() {
       {/* ── FOOTER ─────────────────────────────────── */}
       <footer className="omg-footer">
         <div>
-          <div className="footer-logo">⬡ OMGHOST</div>
+          <div className="footer-logo">
+            <svg className="logo-ghost" viewBox="0 0 200 220" fill="none">
+              <path d="M100 20 C55 20 30 55 30 95 L30 185 L50 165 L70 185 L90 165 L110 185 L130 165 L150 185 L170 165 L170 95 C170 55 145 20 100 20Z" fill="var(--accent)" />
+              <ellipse cx="80" cy="95" rx="14" ry="17" fill="#0e0e0e" />
+              <ellipse cx="120" cy="95" rx="14" ry="17" fill="#0e0e0e" />
+            </svg>
+            OMGHOST
+          </div>
           <div className="footer-tagline">Oh my ghost. SVG icons via API.</div>
         </div>
         <div className="footer-links">
@@ -309,7 +286,7 @@ export default function Home() {
           <a href="https://github.com/desplega-ai/x402-logo">GitHub</a>
           <a href="#studio">Studio</a>
         </div>
-        <div className="footer-copy">&copy; 2025 omghost &middot; Built with x402</div>
+        <div className="footer-copy">&copy; 2026 omghost &middot; Built with x402</div>
       </footer>
     </>
   );
