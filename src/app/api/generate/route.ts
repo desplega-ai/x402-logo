@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       id: generation.id,
+      token: generation.token,
       svg: svgContent,
       style: style.name,
       priceUsd: Number(style.priceUsd),

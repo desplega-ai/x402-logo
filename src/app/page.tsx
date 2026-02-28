@@ -1,9 +1,13 @@
+const LOGO_PRICE = "$0.30";
+const BATCH_PRICE = "$2.40";
+const BATCH_COUNT = 10;
+
 const STYLES = [
   {
     name: "Geometric Minimal",
     description: "Clean shapes, bold simplicity. Think Airbnb, Mastercard.",
-    price: "$0.05",
-    rating: 4.8,
+    rating: 0,
+    ratingCount: 0,
     color: "from-blue-500 to-cyan-400",
     icon: (
       <svg viewBox="0 0 80 80" className="w-16 h-16">
@@ -25,8 +29,8 @@ const STYLES = [
   {
     name: "Lettermark Bold",
     description: "Typography-driven marks. Think HBO, IBM, NASA.",
-    price: "$0.08",
-    rating: 4.9,
+    rating: 0,
+    ratingCount: 0,
     color: "from-violet-500 to-purple-400",
     icon: (
       <svg viewBox="0 0 80 80" className="w-16 h-16">
@@ -46,8 +50,8 @@ const STYLES = [
   {
     name: "Abstract Gradient",
     description: "Fluid forms with depth. Think Instagram, Firefox.",
-    price: "$0.10",
-    rating: 4.7,
+    rating: 0,
+    ratingCount: 0,
     color: "from-pink-500 to-orange-400",
     icon: (
       <svg viewBox="0 0 80 80" className="w-16 h-16">
@@ -65,8 +69,8 @@ const STYLES = [
   {
     name: "Line Art",
     description: "Elegant continuous strokes. Think Squarespace, Medium.",
-    price: "$0.06",
-    rating: 4.6,
+    rating: 0,
+    ratingCount: 0,
     color: "from-emerald-500 to-teal-400",
     icon: (
       <svg viewBox="0 0 80 80" className="w-16 h-16" fill="none">
@@ -89,8 +93,8 @@ const STYLES = [
   {
     name: "Emblem Classic",
     description: "Badge-style authority. Think Porsche, Starbucks.",
-    price: "$0.12",
-    rating: 4.8,
+    rating: 0,
+    ratingCount: 0,
     color: "from-amber-500 to-yellow-400",
     icon: (
       <svg viewBox="0 0 80 80" className="w-16 h-16">
@@ -126,8 +130,8 @@ const STYLES = [
   {
     name: "Wordmark Modern",
     description: "Custom type, unforgettable. Think Google, Spotify.",
-    price: "$0.07",
-    rating: 4.5,
+    rating: 0,
+    ratingCount: 0,
     color: "from-rose-500 to-red-400",
     icon: (
       <svg viewBox="0 0 80 80" className="w-16 h-16">
@@ -162,7 +166,7 @@ const styles = await fetch("https://api.x402.logo/styles", {
 });
 
 // 2. Generate your logo
-const logo = await fetch("https://api.x402.logo/generate", {
+const res = await fetch("https://api.x402.logo/generate", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -175,20 +179,34 @@ const logo = await fetch("https://api.x402.logo/generate", {
   })
 });
 
-const svg = await logo.text(); // Your SVG logo!
+const { svg, token } = await res.json();
+// token lets you re-download or leave a review later
 
-// 3. Rate & get 30% back
+// 3. Re-download anytime
+const asset = await fetch(\`https://api.x402.logo/asset/\${token}\`);
+
+// 4. Review & earn up to 30% back
 await fetch("https://api.x402.logo/rate", {
   method: "POST",
-  headers: { "X-402-Payment": payment_token },
-  body: JSON.stringify({ rating: 5, feedback: "Perfect!" })
+  body: JSON.stringify({ token, rating: 5, feedback: "Perfect!" })
 });`;
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({
+  rating,
+  ratingCount,
+}: {
+  rating: number;
+  ratingCount: number;
+}) {
+  if (!rating || rating === 0 || !ratingCount || ratingCount === 0) {
+    return null;
+  }
   return (
     <span className="inline-flex items-center gap-1 text-sm text-amber-500 font-medium">
       {"★".repeat(Math.floor(rating))}
-      <span className="text-gray-400 ml-1">{rating}</span>
+      <span className="text-gray-400 ml-1">
+        {rating} ({ratingCount})
+      </span>
     </span>
   );
 }
@@ -431,13 +449,16 @@ export default function Home() {
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-bold text-lg">{style.name}</h3>
                   <span className="text-sm font-mono font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
-                    {style.price}
+                    {LOGO_PRICE}
                   </span>
                 </div>
                 <p className="text-gray-500 text-sm mb-3">
                   {style.description}
                 </p>
-                <StarRating rating={style.rating} />
+                <StarRating
+                  rating={style.rating}
+                  ratingCount={style.ratingCount}
+                />
               </div>
             ))}
           </div>
@@ -455,7 +476,7 @@ export default function Home() {
             x402 micropayments and get instant access.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
             {/* x402 Explainer */}
             <div className="bg-white rounded-2xl border border-gray-200 p-8">
               <div className="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center mb-5">
@@ -498,7 +519,7 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Pricing Table */}
+            {/* Simple Pricing */}
             <div className="bg-white rounded-2xl border border-gray-200 p-8">
               <div className="w-12 h-12 rounded-xl bg-accent-100 flex items-center justify-center mb-5">
                 <svg
@@ -511,27 +532,55 @@ export default function Home() {
                   <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-3">Price Per Request</h3>
-              <div className="space-y-3">
-                {STYLES.map((style) => (
-                  <div
-                    key={style.name}
-                    className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
-                  >
-                    <span className="text-gray-700 text-sm">{style.name}</span>
-                    <span className="font-mono font-semibold text-sm">
-                      {style.price}
-                    </span>
-                  </div>
-                ))}
+              <h3 className="text-xl font-bold mb-3">Simple Flat Pricing</h3>
+              <div className="text-center py-6">
+                <div className="text-5xl font-extrabold text-gray-900 mb-1">
+                  {LOGO_PRICE}
+                </div>
+                <div className="text-gray-500">per logo, any style</div>
               </div>
-              <div className="mt-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+              <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
                 <p className="text-sm font-semibold text-emerald-800">
-                  Rate us & get 30% back
+                  We pay for your opinion
                 </p>
                 <p className="text-sm text-emerald-600 mt-1">
-                  After each generation, rate the result. We refund 30% of your
-                  payment — every single time.
+                  Leave a review and get up to 30% back on your spend.
+                </p>
+              </div>
+            </div>
+
+            {/* Batch Pricing */}
+            <div className="bg-white rounded-2xl border-2 border-brand-200 p-8 relative">
+              <div className="absolute -top-3 left-6 px-3 py-0.5 bg-brand-600 text-white text-xs font-bold rounded-full">
+                BEST VALUE
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center mb-5">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-6 h-6 text-brand-600"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-3">Batch — {BATCH_COUNT} Logos</h3>
+              <div className="text-center py-6">
+                <div className="text-5xl font-extrabold text-gray-900 mb-1">
+                  {BATCH_PRICE}
+                </div>
+                <div className="text-gray-500">
+                  for {BATCH_COUNT} logos ({`$${(2.40 / BATCH_COUNT).toFixed(2)}`}/each)
+                </div>
+              </div>
+              <div className="mt-4 p-4 bg-brand-50 rounded-xl border border-brand-200">
+                <p className="text-sm font-semibold text-brand-800">
+                  Save 20% on bulk
+                </p>
+                <p className="text-sm text-brand-600 mt-1">
+                  Generate {BATCH_COUNT} variations in one API call. Same quality, lower price.
                 </p>
               </div>
             </div>
@@ -546,27 +595,36 @@ export default function Home() {
             Dead Simple API
           </h2>
           <p className="text-gray-500 text-center mb-12 text-lg">
-            Three endpoints. That&apos;s the entire API. Here&apos;s everything
-            you need.
+            Five endpoints. Here&apos;s everything you need.
           </p>
 
           {/* Endpoints summary */}
-          <div className="grid sm:grid-cols-3 gap-4 mb-10">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
             {[
               {
                 method: "GET",
                 path: "/styles",
-                desc: "List all available styles",
+                desc: "List all styles",
               },
               {
                 method: "POST",
                 path: "/generate",
-                desc: "Generate an SVG logo",
+                desc: "Generate a logo",
+              },
+              {
+                method: "POST",
+                path: "/generate/batch",
+                desc: "Batch generate",
+              },
+              {
+                method: "GET",
+                path: "/asset/:token",
+                desc: "Re-download SVG",
               },
               {
                 method: "POST",
                 path: "/rate",
-                desc: "Rate & get 30% refund",
+                desc: "Review & earn reward",
               },
             ].map((ep) => (
               <div
@@ -583,7 +641,7 @@ export default function Home() {
                   >
                     {ep.method}
                   </span>
-                  <span className="font-mono text-sm text-gray-700">
+                  <span className="font-mono text-xs text-gray-700">
                     {ep.path}
                   </span>
                 </div>
@@ -612,7 +670,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust / Rating */}
+      {/* Review Reward */}
       <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-100 mb-6">
@@ -627,19 +685,18 @@ export default function Home() {
             </svg>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Love It? Rate It. Get 30% Back.
+            We Pay for Your Opinion
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-            We&apos;re so confident in our logo quality that we built a refund
-            into the product. Rate every logo you generate — we&apos;ll refund
-            30% of what you paid, no questions asked. Your feedback makes us
-            better, and you save money.
+            Your feedback makes our logos better. Leave a review on any logo
+            you generate and get up to 30% back on your spend. Every review
+            helps us improve — and puts money back in your pocket.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             {[
               "Generate a logo",
-              "Rate the result (1-5 stars)",
-              "Get 30% refund instantly",
+              "Leave a review (1-5 stars)",
+              "Get up to 30% back",
             ].map((step, i) => (
               <div
                 key={step}
