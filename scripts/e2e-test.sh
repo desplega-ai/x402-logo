@@ -14,8 +14,19 @@ PASSED=0
 FAILED=0
 TOTAL=0
 
-pass() { ((PASSED++)); ((TOTAL++)); echo "  PASS: $1"; }
-fail() { ((FAILED++)); ((TOTAL++)); echo "  FAIL: $1"; }
+pass() { PASSED=$((PASSED + 1)); TOTAL=$((TOTAL + 1)); echo "  PASS: $1"; }
+fail() { FAILED=$((FAILED + 1)); TOTAL=$((TOTAL + 1)); echo "  FAIL: $1"; }
+http_code() {
+  local url="$1"
+  shift
+  local code
+  code=$(curl -s -o /dev/null -w "%{http_code}" "$@" "$url" 2>/dev/null || true)
+  if [[ "$code" =~ ^[0-9]{3}$ ]]; then
+    echo "$code"
+  else
+    echo "000"
+  fi
+}
 
 echo "Running E2E tests against $BASE_URL"
 echo "======================================"
@@ -54,7 +65,8 @@ fi
 
 # --- Test 3: Generate with invalid style ---
 echo "[3/8] POST /api/generate (invalid style -> 404)"
-ERR_RESULT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/generate" \
+ERR_RESULT=$(http_code "$BASE_URL/api/generate" \
+  -X POST \
   -H "Content-Type: application/json" \
   -d '{"styleName": "NonExistentStyle_12345"}')
 if [ "$ERR_RESULT" = "404" ]; then
@@ -65,7 +77,8 @@ fi
 
 # --- Test 4: Generate with invalid body ---
 echo "[4/8] POST /api/generate (invalid body -> 400)"
-ERR_RESULT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/generate" \
+ERR_RESULT=$(http_code "$BASE_URL/api/generate" \
+  -X POST \
   -H "Content-Type: application/json" \
   -d '{}')
 if [ "$ERR_RESULT" = "400" ]; then
@@ -125,7 +138,7 @@ fi
 
 # --- Test 7: Asset 404 for invalid token ---
 echo "[7/8] GET /api/asset/{invalid} -> 404"
-ERR_RESULT=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/asset/00000000-0000-0000-0000-000000000000")
+ERR_RESULT=$(http_code "$BASE_URL/api/asset/00000000-0000-0000-0000-000000000000")
 if [ "$ERR_RESULT" = "404" ]; then
   pass "Returns 404 for unknown token"
 else
@@ -134,7 +147,7 @@ fi
 
 # --- Test 8: Job status 404 for invalid ID ---
 echo "[8/8] GET /api/generate/{invalid}/status -> 404"
-ERR_RESULT=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/generate/nonexistent123/status")
+ERR_RESULT=$(http_code "$BASE_URL/api/generate/nonexistent123/status")
 if [ "$ERR_RESULT" = "404" ]; then
   pass "Returns 404 for unknown job"
 else
