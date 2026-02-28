@@ -679,12 +679,12 @@ body {
 
 /* ── STUDIO SECTION ─────────────────────────────── */
 .studio-section {
-  padding: 60px 0 100px;
+  padding: 60px 48px 100px;
   position: relative;
 }
 .studio-header {
   text-align: center;
-  padding: 0 48px 56px;
+  padding: 0 0 56px;
   max-width: 700px;
   margin: 0 auto;
 }
@@ -692,7 +692,6 @@ body {
   border: 1px solid var(--border);
   border-radius: 20px;
   overflow: hidden;
-  margin: 0 48px;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 255, 255, 0.04);
 }
@@ -770,13 +769,14 @@ body {
   gap: 6px;
 }
 .color-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
   cursor: pointer;
   transition: transform 0.15s;
   border: none;
-  padding: 0;
+  padding: 1px;
+  background: transparent;
 }
 .color-dot:hover {
   transform: scale(1.25);
@@ -804,8 +804,8 @@ body {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  .studio-embed {
-    margin: 0 16px;
+  .studio-section {
+    padding: 60px 16px 100px;
   }
   .omg-footer {
     flex-direction: column;

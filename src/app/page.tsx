@@ -38,12 +38,17 @@ function ColorSwitcher({ colors, active, onChange }: { colors: string[]; active:
           onClick={() => onChange(color)}
           className="color-dot"
           style={{
-            backgroundColor: color,
             outline: active === color ? `2px solid ${color}` : "none",
             outlineOffset: "2px",
           }}
           aria-label={`Switch to ${color} accent`}
-        />
+        >
+          <svg viewBox="0 0 200 220" fill="none" width="100%" height="100%">
+            <path d="M100 20 C55 20 30 55 30 95 L30 185 L50 165 L70 185 L90 165 L110 185 L130 165 L150 185 L170 165 L170 95 C170 55 145 20 100 20Z" fill={color} />
+            <ellipse cx="80" cy="95" rx="14" ry="17" fill="#0e0e0e" />
+            <ellipse cx="120" cy="95" rx="14" ry="17" fill="#0e0e0e" />
+          </svg>
+        </button>
       ))}
     </div>
   );
@@ -241,7 +246,7 @@ export default function Home() {
 
       {/* ── PRICING ────────────────────────────────── */}
       <section id="pricing" style={{ padding: "100px 48px", textAlign: "center" }}>
-        <div className="section-kicker">Pricing</div>
+        <div className="section-kicker">pay-per-svg</div>
         <h2 className="section-title" style={{ fontSize: 64, marginBottom: 8 }}>
           $0.10<span style={{ fontWeight: 400, fontSize: 24, opacity: 0.5 }}> / image</span>
         </h2>
