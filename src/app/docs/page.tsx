@@ -81,7 +81,7 @@ function OverviewSection() {
 
       <h3>Pricing</h3>
       <p>
-        <strong>$0.30 per icon.</strong> Payment is handled via the x402
+        <strong>$0.10 per image (SVG &amp; PNG).</strong> Payment is handled via the x402
         micropayment protocol — your HTTP client pays automatically per request.
         No API keys, no subscriptions.
       </p>
@@ -202,8 +202,32 @@ function GenerateSection() {
 
       <p>
         Starts an asynchronous SVG generation job. Returns immediately with a{" "}
-        <code>jobId</code> that you poll for completion.
+        <code>jobId</code> that you poll for completion. This endpoint requires
+        x402 micropayment (<strong>$0.10</strong> per request).
       </p>
+
+      <h3>Authentication (x402)</h3>
+      <p>
+        This endpoint is gated by the{" "}
+        <a href="https://x402.org" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>
+          x402 micropayment protocol
+        </a>
+        . When you call it without payment, you&apos;ll receive an HTTP{" "}
+        <code>402 Payment Required</code> response containing payment
+        instructions. Your x402-compatible client handles payment automatically.
+      </p>
+      <CodeBlock title="402 Payment Required (initial response)">{`{
+  "accepts": [
+    {
+      "scheme": "exact",
+      "price": "$0.10",
+      "network": "eip155:84532",
+      "payTo": "0x..."
+    }
+  ],
+  "description": "Generate a custom SVG icon in your chosen style",
+  "mimeType": "application/json"
+}`}</CodeBlock>
 
       <h3>Request Body</h3>
       <table className="doc-table">
@@ -652,8 +676,10 @@ export default function DocsPage() {
     <div className="docs-page">
       <nav className="docs-nav">
         <Link href="/" className="docs-logo">
-          <svg viewBox="0 0 32 32" width="24" height="24" fill="currentColor">
-            <path d="M16 2C10 2 6 8 6 14v10c0 0 1.5 2 3 2s2-3 2-3 1 3 3 3 2-3 2-3 1 3 3 3 2-3 2-3 1 3 3 3 1.5-2 1.5-2V14c0-6-3.5-12-9.5-12zm-4 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" />
+          <svg viewBox="0 0 200 220" width="24" height="24" fill="none">
+            <path d="M100 20 C55 20 30 55 30 95 L30 185 L50 165 L70 185 L90 165 L110 185 L130 165 L150 185 L170 165 L170 95 C170 55 145 20 100 20Z" fill="currentColor" />
+            <ellipse cx="80" cy="95" rx="14" ry="17" fill="#0e0e0e" />
+            <ellipse cx="120" cy="95" rx="14" ry="17" fill="#0e0e0e" />
           </svg>
           <span>omghost</span>
         </Link>

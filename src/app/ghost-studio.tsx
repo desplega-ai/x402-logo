@@ -300,6 +300,14 @@ export default function GhostStudio() {
   const activeColor = targetColors[activeTarget];
   const setActiveColor = (c: string) => setTargetColor[activeTarget](c);
 
+  const randomizeColors = () => {
+    const randHex = () => "#" + Array.from({ length: 3 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join("");
+    setGhostColor(randHex());
+    setEyeColor(randHex());
+    setBgColor(randHex());
+    setStyleIdx(Math.floor(Math.random() * STYLES.length));
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") setStyleIdx(i => (i - 1 + STYLES.length) % STYLES.length);
@@ -330,6 +338,11 @@ export default function GhostStudio() {
         .ghost-anim { animation:ghostIn 0.28s cubic-bezier(0.34,1.56,0.64,1); }
         .gs-panel input[type=range] { -webkit-appearance:none; appearance:none; background:transparent; }
         .gs-panel input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#fff; cursor:pointer; border:2px solid #333; }
+        .gs-randomize { width:100%; padding:10px 14px; border-radius:8px; border:1.5px solid rgba(232,255,79,0.3); background:rgba(232,255,79,0.06); color:#e8ff4f; font-family:'Inter',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .gs-randomize:hover { background:rgba(232,255,79,0.15); border-color:rgba(232,255,79,0.6); transform:scale(1.02); }
+        .gs-randomize:active { transform:scale(0.97); }
+        @keyframes diceRoll { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        .gs-randomize:active .dice-icon { animation:diceRoll 0.3s ease-out; }
       `}</style>
 
       {/* Header */}
@@ -408,6 +421,14 @@ export default function GhostStudio() {
                 />
               ))}
             </div>
+          </div>
+
+          {/* Randomize */}
+          <div style={{ padding: "12px 16px", borderBottom: "1px solid #1a1a1a" }}>
+            <button className="gs-randomize" onClick={randomizeColors}>
+              <span className="dice-icon" style={{ fontSize: 16 }}>&#127922;</span>
+              Randomize
+            </button>
           </div>
 
           {/* Stroke */}
