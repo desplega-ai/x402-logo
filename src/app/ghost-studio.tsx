@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, TouchEvent as ReactTouchEvent } from "react";
 
 /* ── Ghost SVG Styles ─────────────────────────────── */
 const STYLES = [
@@ -451,6 +451,28 @@ export default function GhostStudio() {
     setStyleIdx(Math.floor(Math.random() * STYLES.length));
   };
 
+  /* ── Touch swipe for mobile style navigation ──── */
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const handleTouchStart = (e: ReactTouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const handleTouchEnd = (e: ReactTouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+    // Only trigger if horizontal swipe > 40px and more horizontal than vertical
+    if (absDx > 40 && absDx > absDy * 1.5) {
+      if (dx < 0) setStyleIdx(i => (i + 1) % STYLES.length);
+      else setStyleIdx(i => (i - 1 + STYLES.length) % STYLES.length);
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") setStyleIdx(i => (i - 1 + STYLES.length) % STYLES.length);
@@ -504,8 +526,12 @@ export default function GhostStudio() {
 
         {mobilePanel === "preview" ? (
           <>
-            {/* Preview */}
-            <div style={{ height: 280, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: bgColor, position: "relative", transition: "background 0.3s" }}>
+            {/* Preview — swipe left/right to change styles */}
+            <div
+              style={{ height: 280, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: bgColor, position: "relative", transition: "background 0.3s", touchAction: "pan-y" }}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
               <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(rgba(0,0,0,0.6) 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
               <div key={styleIdx} className="ghost-anim" style={{ width: 160, height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {activeStyle.render(ghostProps)}
