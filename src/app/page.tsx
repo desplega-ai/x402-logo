@@ -221,14 +221,14 @@ export default function Home() {
               className="px-8 py-4 font-bold rounded-xl text-black text-lg transition-opacity hover:opacity-90"
               style={{ backgroundColor: fg }}
             >
-              Try the API
+              Pimp My Icons
             </a>
             <a
               href="#styles"
               className="px-8 py-4 font-bold rounded-xl border text-lg transition-opacity hover:opacity-80"
               style={{ borderColor: `${fg}30`, color: `${fg}99` }}
             >
-              Browse Styles
+              See the Drip
             </a>
           </div>
 
@@ -299,7 +299,7 @@ export default function Home() {
       <section className="py-20 px-6" style={{ backgroundColor: `${fg}05` }}>
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Three Steps to Your Icon
+            Three Steps. Zero Hassle. All Drip.
           </h2>
           <p
             className="text-center mb-16 text-lg"
@@ -312,19 +312,19 @@ export default function Home() {
             {[
               {
                 step: "01",
-                title: "Choose a Style",
+                title: "Pick Your Flavor",
                 description:
                   "Browse 8 hand-crafted icon styles — from retro pixel art to futuristic HUD interfaces.",
               },
               {
                 step: "02",
-                title: "Describe Your Icon",
+                title: "Tell Us What You Want",
                 description:
                   "Tell us what you need — a rocket, a shield, a brain. Our AI generates it in your chosen style.",
               },
               {
                 step: "03",
-                title: "Get Your SVG",
+                title: "Grab Your SVG",
                 description:
                   "Receive a production-ready SVG icon instantly. Scales infinitely, works everywhere.",
               },
@@ -354,7 +354,7 @@ export default function Home() {
       <section id="styles" className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            8 Hand-Crafted Styles
+            8 Styles. All Heat.
           </h2>
           <p
             className="text-center mb-16 text-lg max-w-2xl mx-auto"
@@ -433,7 +433,7 @@ export default function Home() {
       >
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Pay Per Icon. That&apos;s It.
+            No Subscriptions. No BS.
           </h2>
           <p
             className="text-center mb-16 text-lg max-w-2xl mx-auto"
@@ -474,10 +474,10 @@ export default function Home() {
               </p>
               <ul className="space-y-2">
                 {[
-                  "No signup or API keys required",
-                  "Pay exactly what you use",
-                  "Instant settlement on every request",
-                  "Works with any HTTP client",
+                  "Zero signup — just pay and go",
+                  "Only pay for what you actually use",
+                  "Instant settlement, every single time",
+                  "Works with any HTTP client on earth",
                 ].map((item) => (
                   <li
                     key={item}
@@ -518,7 +518,7 @@ export default function Home() {
                   <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-3">Simple Flat Pricing</h3>
+              <h3 className="text-xl font-bold mb-3">Straight-Up Pricing</h3>
               <div className="text-center py-6">
                 <div className="text-5xl font-extrabold mb-1">
                   {LOGO_PRICE}
@@ -602,7 +602,7 @@ export default function Home() {
       <section id="api" className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Dead Simple API
+            The API is Stupid Simple
           </h2>
           <p
             className="text-center mb-12 text-lg"
@@ -617,22 +617,22 @@ export default function Home() {
               {
                 method: "GET",
                 path: "/styles",
-                desc: "List all styles",
+                desc: "Browse the drip",
               },
               {
                 method: "POST",
                 path: "/generate",
-                desc: "Generate an icon",
+                desc: "Mint your icon",
               },
               {
                 method: "GET",
                 path: "/asset/:token",
-                desc: "Re-download SVG",
+                desc: "Grab it again",
               },
               {
                 method: "POST",
                 path: "/rate",
-                desc: "Review & earn reward",
+                desc: "Rate it, get paid",
               },
             ].map((ep) => (
               <div
@@ -725,7 +725,7 @@ export default function Home() {
             </svg>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            We Pay for Your Opinion
+            Get Paid to Have Opinions
           </h2>
           <p
             className="text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
@@ -737,9 +737,9 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             {[
-              "Generate an icon",
-              "Leave a review (1-5 stars)",
-              "Get up to 30% back",
+              "Get your icon",
+              "Drop a rating (be honest)",
+              "Collect up to 30% back",
             ].map((step, i) => (
               <div
                 key={step}
@@ -775,7 +775,7 @@ export default function Home() {
             className="inline-flex px-10 py-5 font-bold rounded-xl text-black text-lg transition-opacity hover:opacity-90"
             style={{ backgroundColor: fg }}
           >
-            Get Your Icon Now
+            Pimp My Icons Now
           </a>
         </div>
       </section>
