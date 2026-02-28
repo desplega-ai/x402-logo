@@ -4,176 +4,83 @@ const BATCH_COUNT = 10;
 
 const STYLES = [
   {
-    name: "Geometric Minimal",
-    description: "Clean shapes, bold simplicity. Think Airbnb, Mastercard.",
-    rating: 0,
-    ratingCount: 0,
-    color: "from-blue-500 to-cyan-400",
-    icon: (
-      <svg viewBox="0 0 80 80" className="w-16 h-16">
-        <rect
-          x="10"
-          y="10"
-          width="60"
-          height="60"
-          rx="8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-        />
-        <circle cx="40" cy="40" r="18" fill="currentColor" opacity="0.2" />
-        <circle cx="40" cy="40" r="10" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    name: "Lettermark Bold",
-    description: "Typography-driven marks. Think HBO, IBM, NASA.",
-    rating: 0,
-    ratingCount: 0,
-    color: "from-violet-500 to-purple-400",
-    icon: (
-      <svg viewBox="0 0 80 80" className="w-16 h-16">
-        <text
-          x="40"
-          y="55"
-          textAnchor="middle"
-          fontSize="40"
-          fontWeight="900"
-          fill="currentColor"
-        >
-          Ab
-        </text>
-      </svg>
-    ),
-  },
-  {
-    name: "Abstract Gradient",
-    description: "Fluid forms with depth. Think Instagram, Firefox.",
-    rating: 0,
-    ratingCount: 0,
+    name: "Pixel Icons",
+    description:
+      "Chunky, retro pixel-art icons with vivid diagonal gradients on a black canvas.",
     color: "from-pink-500 to-orange-400",
-    icon: (
-      <svg viewBox="0 0 80 80" className="w-16 h-16">
-        <defs>
-          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="currentColor" />
-          </linearGradient>
-        </defs>
-        <circle cx="30" cy="35" r="20" fill="url(#grad1)" />
-        <circle cx="50" cy="45" r="20" fill="currentColor" opacity="0.5" />
-      </svg>
-    ),
+    bgColor: "#EBEBEB",
+    svgHtml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" class="w-full h-full"><rect width="160" height="160" fill="#EBEBEB"/><rect x="50" y="70" width="10" height="10" fill="#000"/><rect x="60" y="70" width="10" height="10" fill="#000"/><rect x="70" y="70" width="10" height="10" fill="#000"/><rect x="80" y="70" width="10" height="10" fill="#000"/><rect x="90" y="70" width="10" height="10" fill="#000"/><rect x="40" y="80" width="10" height="10" fill="#000"/><rect x="50" y="80" width="10" height="10" fill="#000"/><rect x="60" y="80" width="10" height="10" fill="#000"/><rect x="70" y="80" width="10" height="10" fill="#000"/><rect x="80" y="80" width="10" height="10" fill="#000"/><rect x="90" y="80" width="10" height="10" fill="#000"/><rect x="100" y="80" width="10" height="10" fill="#000"/><rect x="40" y="90" width="10" height="10" fill="#000"/><rect x="50" y="90" width="10" height="10" fill="#000"/><rect x="60" y="90" width="10" height="10" fill="#000"/><rect x="70" y="90" width="10" height="10" fill="#000"/><rect x="80" y="90" width="10" height="10" fill="#000"/><rect x="90" y="90" width="10" height="10" fill="#000"/><rect x="100" y="90" width="10" height="10" fill="#000"/><rect x="40" y="100" width="10" height="10" fill="#000"/><rect x="50" y="100" width="10" height="10" fill="#000"/><rect x="60" y="100" width="10" height="10" fill="#000"/><rect x="70" y="100" width="10" height="10" fill="#000"/><rect x="80" y="100" width="10" height="10" fill="#000"/><rect x="90" y="100" width="10" height="10" fill="#000"/><rect x="100" y="100" width="10" height="10" fill="#000"/><rect x="50" y="110" width="10" height="10" fill="#000"/><rect x="60" y="110" width="10" height="10" fill="#000"/><rect x="70" y="110" width="10" height="10" fill="#000"/><rect x="80" y="110" width="10" height="10" fill="#000"/><rect x="90" y="110" width="10" height="10" fill="#000"/><rect x="110" y="80" width="10" height="10" fill="#000"/><rect x="120" y="90" width="10" height="10" fill="#000"/><rect x="120" y="100" width="10" height="10" fill="#000"/><rect x="110" y="110" width="10" height="10" fill="#000"/><rect x="100" y="110" width="10" height="10" fill="#000"/><rect x="60" y="30" width="10" height="10" fill="#000"/><rect x="60" y="40" width="10" height="10" fill="#000"/><rect x="70" y="20" width="10" height="10" fill="#000"/><rect x="70" y="30" width="10" height="10" fill="#000"/><rect x="80" y="30" width="10" height="10" fill="#000"/><rect x="80" y="40" width="10" height="10" fill="#000"/></svg>`,
   },
   {
-    name: "Line Art",
-    description: "Elegant continuous strokes. Think Squarespace, Medium.",
-    rating: 0,
-    ratingCount: 0,
-    color: "from-emerald-500 to-teal-400",
-    icon: (
-      <svg viewBox="0 0 80 80" className="w-16 h-16" fill="none">
-        <path
-          d="M15 60 Q40 10 65 60"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        <path
-          d="M25 55 Q40 25 55 55"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          opacity="0.5"
-        />
-      </svg>
-    ),
+    name: "Neon Solid",
+    description:
+      "Bold gradient-filled icons with negative-space details on solid black.",
+    color: "from-yellow-400 to-green-400",
+    bgColor: "#000000",
+    svgHtml: null,
   },
   {
-    name: "Emblem Classic",
-    description: "Badge-style authority. Think Porsche, Starbucks.",
-    rating: 0,
-    ratingCount: 0,
-    color: "from-amber-500 to-yellow-400",
-    icon: (
-      <svg viewBox="0 0 80 80" className="w-16 h-16">
-        <circle
-          cx="40"
-          cy="40"
-          r="30"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-        />
-        <circle
-          cx="40"
-          cy="40"
-          r="22"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <text
-          x="40"
-          y="46"
-          textAnchor="middle"
-          fontSize="16"
-          fontWeight="700"
-          fill="currentColor"
-        >
-          ★
-        </text>
-      </svg>
-    ),
+    name: "Minimalist Two-Tone",
+    description:
+      "Bold circles with graphic cutout symbols in a single saturated color on black.",
+    color: "from-lime-400 to-lime-300",
+    bgColor: "#000000",
+    svgHtml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250" class="w-full h-full"><rect width="250" height="250" fill="#000000"/><g transform="translate(25, 25)"><circle cx="100" cy="100" r="100" fill="#CCFF00"/><path d="M100,10 Q105,95 190,100 Q105,105 100,190 Q95,105 10,100 Q95,95 100,10Z" fill="#000000"/></g></svg>`,
   },
   {
-    name: "Wordmark Modern",
-    description: "Custom type, unforgettable. Think Google, Spotify.",
-    rating: 0,
-    ratingCount: 0,
-    color: "from-rose-500 to-red-400",
-    icon: (
-      <svg viewBox="0 0 80 80" className="w-16 h-16">
-        <text
-          x="40"
-          y="48"
-          textAnchor="middle"
-          fontSize="22"
-          fontWeight="800"
-          fill="currentColor"
-          letterSpacing="-1"
-        >
-          logo
-        </text>
-        <line
-          x1="15"
-          y1="56"
-          x2="65"
-          y2="56"
-          stroke="currentColor"
-          strokeWidth="2"
-          opacity="0.3"
-        />
-      </svg>
-    ),
+    name: "FUI",
+    description:
+      "Sci-fi HUD-style icons with technical arcs, crosshairs, and angular stroke geometry.",
+    color: "from-cyan-400 to-teal-300",
+    bgColor: "#000000",
+    svgHtml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-full h-full" fill="none"><rect width="64" height="64" fill="#000"/><circle cx="32" cy="32" r="26" stroke="#00FFD1" stroke-width="1" stroke-dasharray="2, 4" opacity="0.3" /><path d="M12 4H4v8M52 4h8v8M12 60H4v-8M52 60h8v-8" stroke="#00FFD1" stroke-width="1.5" stroke-linecap="square" /><path d="M32 12 A20 20 0 0 1 52 32" stroke="#00FFD1" stroke-width="2" stroke-linecap="butt" /><path d="M32 52 A20 20 0 0 1 12 32" stroke="#00FFD1" stroke-width="2" stroke-linecap="butt" /><circle cx="32" cy="32" r="14" stroke="#00FFD1" stroke-width="1" stroke-dasharray="8, 3" opacity="0.6" /><line x1="32" y1="28" x2="32" y2="36" stroke="#00FFD1" stroke-width="1.5" /><line x1="28" y1="32" x2="36" y2="32" stroke="#00FFD1" stroke-width="1.5" /><line x1="32" y1="8" x2="32" y2="10" stroke="#00FFD1" stroke-width="1.5" /><line x1="32" y1="54" x2="32" y2="56" stroke="#00FFD1" stroke-width="1.5" /><line x1="8" y1="32" x2="10" y2="32" stroke="#00FFD1" stroke-width="1.5" /><line x1="54" y1="32" x2="56" y2="32" stroke="#00FFD1" stroke-width="1.5" /><polyline points="22,22 32,32 42,22" stroke="#00FFD1" stroke-width="1" opacity="0.8" /></svg>`,
+  },
+  {
+    name: "Dotmatrix",
+    description:
+      "Retro LED-style icons built entirely from uniform dot grids on dark charcoal.",
+    color: "from-gray-200 to-gray-400",
+    bgColor: "#1a1a1a",
+    svgHtml: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" class="w-full h-full"><rect width="160" height="160" fill="#1a1a1a"/><g fill="#FFFFFF"><circle cx="55" cy="25" r="3.5" /><circle cx="65" cy="25" r="3.5" /><circle cx="95" cy="25" r="3.5" /><circle cx="105" cy="25" r="3.5" /><circle cx="45" cy="35" r="3.5" /><circle cx="55" cy="35" r="3.5" /><circle cx="65" cy="35" r="3.5" /><circle cx="75" cy="35" r="3.5" /><circle cx="85" cy="35" r="3.5" /><circle cx="95" cy="35" r="3.5" /><circle cx="105" cy="35" r="3.5" /><circle cx="115" cy="35" r="3.5" /><circle cx="45" cy="45" r="3.5" /><circle cx="55" cy="45" r="3.5" /><circle cx="65" cy="45" r="3.5" /><circle cx="75" cy="45" r="3.5" /><circle cx="85" cy="45" r="3.5" /><circle cx="95" cy="45" r="3.5" /><circle cx="105" cy="45" r="3.5" /><circle cx="115" cy="45" r="3.5" /><circle cx="55" cy="55" r="3.5" /><circle cx="65" cy="55" r="3.5" /><circle cx="75" cy="55" r="3.5" /><circle cx="85" cy="55" r="3.5" /><circle cx="95" cy="55" r="3.5" /><circle cx="105" cy="55" r="3.5" /><circle cx="55" cy="65" r="3.5" /><circle cx="65" cy="65" r="3.5" /><circle cx="75" cy="65" r="3.5" /><circle cx="85" cy="65" r="3.5" /><circle cx="95" cy="65" r="3.5" /><circle cx="105" cy="65" r="3.5" /><circle cx="65" cy="75" r="3.5" /><circle cx="75" cy="75" r="3.5" /><circle cx="85" cy="75" r="3.5" /><circle cx="95" cy="75" r="3.5" /><circle cx="65" cy="85" r="3.5" /><circle cx="75" cy="85" r="3.5" /><circle cx="85" cy="85" r="3.5" /><circle cx="95" cy="85" r="3.5" /><circle cx="75" cy="95" r="3.5" /><circle cx="85" cy="95" r="3.5" /><circle cx="75" cy="105" r="3.5" /><circle cx="85" cy="105" r="3.5" /></g></svg>`,
+  },
+  {
+    name: "Colorblock Badge",
+    description:
+      "Bold flat icons on vivid color-blocked square backgrounds with strong contrast.",
+    color: "from-blue-500 to-indigo-400",
+    bgColor: "#A0C4FF",
+    svgHtml: `<svg viewBox="0 0 64 64" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#1e40af"/><path d="M32 14C32 14 46 18 46 28V38C46 44 32 50 32 50C32 50 18 44 18 38V28C18 18 32 14 32 14Z" fill="#fff"/><path d="M26 33L30 37L38 29" stroke="#1e40af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  },
+  {
+    name: "Glassmorphism",
+    description:
+      "Frosted-glass layered icons with translucent panels and soft rounded strokes.",
+    color: "from-blue-300 to-purple-300",
+    bgColor: "#0F1118",
+    svgHtml: `<svg viewBox="0 0 64 64" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#0F1118"/><circle cx="20" cy="44" r="10" fill="#3D4A70" fill-opacity="0.06"/><rect x="8" y="8" width="48" height="48" rx="10" fill="#FFFFFF" fill-opacity="0.15" stroke="#C0D8FF" stroke-width="1.2" stroke-opacity="0.6"/><rect x="12" y="12" width="40" height="40" rx="8" fill="#FFFFFF" fill-opacity="0.08"/><rect x="14" y="10" width="36" height="2" rx="1" fill="#FFFFFF" fill-opacity="0.12"/><path d="M32 25C28.134 25 25 28.134 25 32C25 35.866 28.134 39 32 39C35.866 39 39 35.866 39 32C39 28.134 35.866 25 32 25ZM32 19L32 22M32 42L32 45M41.1924 22.8076L39.0711 24.9289M24.9289 39.0711L22.8076 41.1924M45 32H42M22 32H19M41.1924 41.1924L39.0711 39.0711M24.9289 24.9289L22.8076 22.8076" stroke="#A8CFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  },
+  {
+    name: "Neon Glow / Cyberpunk",
+    description:
+      "Vivid neon-tube stroke icons with glowing halos on deep black backgrounds.",
+    color: "from-blue-400 to-cyan-300",
+    bgColor: "#050510",
+    svgHtml: `<svg viewBox="0 0 64 64" class="w-full h-full" xmlns="http://www.w3.org/2000/svg"><defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect width="64" height="64" fill="#050510"/><g filter="url(#glow)" stroke="#00AAFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="32" cy="32" r="28" /><circle cx="32" cy="32" r="1" /><path d="M 32,8 L 40,32 L 32,56 L 24,32 Z" /><line x1="10" y1="10" x2="16" y2="16" /><line x1="54" y1="10" x2="48" y2="16" /><line x1="10" y1="54" x2="16" y2="48" /><line x1="54" y1="54" x2="48" y2="48" /></g></svg>`,
   },
 ];
 
 const API_SNIPPET = `// 1. List available styles
-const styles = await fetch("https://api.x402.logo/styles", {
-  headers: { "X-402-Payment": payment_token }
-});
+const styles = await fetch("https://api.pimpmysvg.xyz/styles");
 
-// 2. Generate your logo
-const res = await fetch("https://api.x402.logo/generate", {
+// 2. Generate your SVG icon
+const res = await fetch("https://api.pimpmysvg.xyz/generate", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
     "X-402-Payment": payment_token
   },
   body: JSON.stringify({
-    style: "geometric-minimal",
+    style: "fui",
     brand: "My Startup",
     voice: "modern, bold, tech-forward"
   })
@@ -183,33 +90,13 @@ const { svg, token } = await res.json();
 // token lets you re-download or leave a review later
 
 // 3. Re-download anytime
-const asset = await fetch(\`https://api.x402.logo/asset/\${token}\`);
+const asset = await fetch(\`https://api.pimpmysvg.xyz/asset/\${token}\`);
 
 // 4. Review & earn up to 30% back
-await fetch("https://api.x402.logo/rate", {
+await fetch("https://api.pimpmysvg.xyz/rate", {
   method: "POST",
   body: JSON.stringify({ token, rating: 5, feedback: "Perfect!" })
 });`;
-
-function StarRating({
-  rating,
-  ratingCount,
-}: {
-  rating: number;
-  ratingCount: number;
-}) {
-  if (!rating || rating === 0 || !ratingCount || ratingCount === 0) {
-    return null;
-  }
-  return (
-    <span className="inline-flex items-center gap-1 text-sm text-amber-500 font-medium">
-      {"★".repeat(Math.floor(rating))}
-      <span className="text-gray-400 ml-1">
-        {rating} ({ratingCount})
-      </span>
-    </span>
-  );
-}
 
 export default function Home() {
   return (
@@ -230,7 +117,7 @@ export default function Home() {
               </svg>
             </div>
             <span className="font-bold text-lg">
-              x402<span className="text-brand-500">.logo</span>
+              Pimp My <span className="text-brand-500">SVG</span>
             </span>
           </div>
           <div className="hidden sm:flex items-center gap-8 text-sm font-medium text-gray-600">
@@ -265,7 +152,7 @@ export default function Home() {
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6">
-            Instant SVG Logos
+            Instant SVG Icons
             <br />
             <span className="bg-gradient-to-r from-brand-500 via-accent-500 to-brand-600 bg-clip-text text-transparent">
               via API
@@ -273,9 +160,9 @@ export default function Home() {
           </h1>
 
           <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Professional vector logos in seconds. Choose from battle-tested
-            industry styles, describe your brand, and get a pixel-perfect SVG.
-            Pay per request — no signup, no subscription.
+            Professional vector icons in seconds. Choose from 8 hand-crafted
+            styles — pixel art, neon glow, FUI, glassmorphism, and more. Pay per
+            request with x402 micropayments.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -293,7 +180,7 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Hero visual — animated SVG showcase */}
+          {/* Hero visual — style grid preview */}
           <div className="relative max-w-3xl mx-auto">
             <div className="absolute inset-0 bg-gradient-to-r from-brand-200 via-accent-200 to-brand-200 rounded-3xl blur-3xl opacity-30" />
             <div className="relative bg-gray-950 rounded-2xl p-6 sm:p-8 border border-gray-800 shadow-2xl">
@@ -302,69 +189,35 @@ export default function Home() {
                 <div className="w-3 h-3 rounded-full bg-yellow-500" />
                 <div className="w-3 h-3 rounded-full bg-green-500" />
                 <span className="ml-3 text-gray-500 text-sm font-mono">
-                  response.svg
+                  8 styles available
                 </span>
               </div>
-              <div className="flex items-center justify-center py-8">
-                <svg
-                  viewBox="0 0 200 80"
-                  className="w-full max-w-md"
-                  fill="none"
-                >
-                  <defs>
-                    <linearGradient
-                      id="heroGrad"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="100%"
-                    >
-                      <stop offset="0%" stopColor="#3b82f6" />
-                      <stop offset="50%" stopColor="#8b5cf6" />
-                      <stop offset="100%" stopColor="#3b82f6" />
-                    </linearGradient>
-                  </defs>
-                  <rect
-                    x="2"
-                    y="10"
-                    width="60"
-                    height="60"
-                    rx="14"
-                    fill="url(#heroGrad)"
-                  />
-                  <text
-                    x="32"
-                    y="50"
-                    textAnchor="middle"
-                    fontSize="28"
-                    fontWeight="800"
-                    fill="white"
+              <div className="grid grid-cols-4 gap-3 py-4">
+                {STYLES.slice(0, 8).map((style) => (
+                  <div
+                    key={style.name}
+                    className="aspect-square rounded-lg overflow-hidden"
+                    style={{ backgroundColor: style.bgColor }}
                   >
-                    X
-                  </text>
-                  <text
-                    x="80"
-                    y="52"
-                    fontSize="32"
-                    fontWeight="800"
-                    fill="white"
-                    letterSpacing="-1"
-                  >
-                    acme
-                  </text>
-                  <text
-                    x="80"
-                    y="66"
-                    fontSize="10"
-                    fill="#6b7280"
-                    letterSpacing="3"
-                  >
-                    INDUSTRIES
-                  </text>
-                </svg>
+                    {style.svgHtml ? (
+                      <div
+                        dangerouslySetInnerHTML={{ __html: style.svgHtml }}
+                        className="w-full h-full"
+                      />
+                    ) : (
+                      <div
+                        className={`w-full h-full bg-gradient-to-br ${style.color} flex items-center justify-center`}
+                      >
+                        <span className="text-white/60 text-xs font-mono">
+                          {style.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
               <div className="text-center text-gray-500 text-sm font-mono">
-                &lt;svg&gt; — 2.4 KB — Generated in 1.2s
+                Hand-crafted by Tam &mdash; 8 unique icon styles
               </div>
             </div>
           </div>
@@ -375,10 +228,10 @@ export default function Home() {
       <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Three Steps to Your Logo
+            Three Steps to Your Icon
           </h2>
           <p className="text-gray-500 text-center mb-16 text-lg">
-            No accounts. No waiting. Just logos.
+            No accounts. No waiting. Just icons.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -387,21 +240,21 @@ export default function Home() {
                 step: "01",
                 title: "Choose a Style",
                 description:
-                  "Browse our curated collection of battle-tested logo styles inspired by the world's top brands.",
+                  "Browse 8 hand-crafted icon styles — from retro pixel art to futuristic HUD interfaces.",
                 gradient: "from-brand-500 to-blue-400",
               },
               {
                 step: "02",
-                title: "Describe Your Brand",
+                title: "Describe Your Icon",
                 description:
-                  "Tell us your brand name and voice — modern, playful, corporate, minimal. We handle the rest.",
+                  "Tell us what you need — a rocket, a shield, a brain. Our AI generates it in your chosen style.",
                 gradient: "from-accent-500 to-purple-400",
               },
               {
                 step: "03",
                 title: "Get Your SVG",
                 description:
-                  "Receive a production-ready SVG logo instantly. Scales infinitely, works everywhere.",
+                  "Receive a production-ready SVG icon instantly. Scales infinitely, works everywhere.",
                 gradient: "from-emerald-500 to-teal-400",
               },
             ].map((item) => (
@@ -428,37 +281,66 @@ export default function Home() {
       <section id="styles" className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Battle-Tested Styles
+            8 Hand-Crafted Styles
           </h2>
           <p className="text-gray-500 text-center mb-16 text-lg max-w-2xl mx-auto">
-            Every style is inspired by logos that built billion-dollar brands.
-            Choose one and make it yours.
+            Each style has its own personality and system prompt. Pick the vibe
+            that fits your brand.
           </p>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {STYLES.map((style) => (
               <div
                 key={style.name}
-                className="group relative bg-white rounded-2xl border border-gray-200 p-6 hover:border-gray-300 hover:shadow-xl transition-all"
+                className="group relative bg-white rounded-2xl border border-gray-200 p-4 hover:border-gray-300 hover:shadow-xl transition-all"
               >
                 <div
-                  className={`w-full aspect-square rounded-xl bg-gradient-to-br ${style.color} flex items-center justify-center text-white mb-5`}
+                  className="w-full aspect-square rounded-xl overflow-hidden mb-4"
+                  style={{ backgroundColor: style.bgColor }}
                 >
-                  {style.icon}
+                  {style.svgHtml ? (
+                    <div
+                      dangerouslySetInnerHTML={{ __html: style.svgHtml }}
+                      className="w-full h-full"
+                    />
+                  ) : (
+                    <div
+                      className={`w-full h-full bg-gradient-to-br ${style.color} flex items-center justify-center`}
+                    >
+                      <svg
+                        viewBox="0 0 80 80"
+                        className="w-16 h-16 text-white/80"
+                      >
+                        <rect
+                          x="10"
+                          y="10"
+                          width="60"
+                          height="60"
+                          rx="12"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                        />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="15"
+                          fill="currentColor"
+                          opacity="0.4"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-lg">{style.name}</h3>
-                  <span className="text-sm font-mono font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-bold text-sm">{style.name}</h3>
+                  <span className="text-xs font-mono font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
                     {LOGO_PRICE}
                   </span>
                 </div>
-                <p className="text-gray-500 text-sm mb-3">
+                <p className="text-gray-500 text-xs leading-relaxed">
                   {style.description}
                 </p>
-                <StarRating
-                  rating={style.rating}
-                  ratingCount={style.ratingCount}
-                />
               </div>
             ))}
           </div>
@@ -469,10 +351,10 @@ export default function Home() {
       <section id="pricing" className="py-20 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Pay Per Logo. That&apos;s It.
+            Pay Per Icon. That&apos;s It.
           </h2>
           <p className="text-gray-500 text-center mb-16 text-lg max-w-2xl mx-auto">
-            No subscriptions. No credits to buy. Just pay for each logo with
+            No subscriptions. No credits to buy. Just pay for each icon with
             x402 micropayments and get instant access.
           </p>
 
@@ -537,7 +419,7 @@ export default function Home() {
                 <div className="text-5xl font-extrabold text-gray-900 mb-1">
                   {LOGO_PRICE}
                 </div>
-                <div className="text-gray-500">per logo, any style</div>
+                <div className="text-gray-500">per icon, any style</div>
               </div>
               <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
                 <p className="text-sm font-semibold text-emerald-800">
@@ -566,13 +448,17 @@ export default function Home() {
                   <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-3">Batch — {BATCH_COUNT} Logos</h3>
+              <h3 className="text-xl font-bold mb-3">
+                Batch — {BATCH_COUNT} Icons
+              </h3>
               <div className="text-center py-6">
                 <div className="text-5xl font-extrabold text-gray-900 mb-1">
                   {BATCH_PRICE}
                 </div>
                 <div className="text-gray-500">
-                  for {BATCH_COUNT} logos ({`$${(2.40 / BATCH_COUNT).toFixed(2)}`}/each)
+                  for {BATCH_COUNT} icons (
+                  {`$${(2.4 / BATCH_COUNT).toFixed(2)}`}
+                  /each)
                 </div>
               </div>
               <div className="mt-4 p-4 bg-brand-50 rounded-xl border border-brand-200">
@@ -580,7 +466,8 @@ export default function Home() {
                   Save 20% on bulk
                 </p>
                 <p className="text-sm text-brand-600 mt-1">
-                  Generate {BATCH_COUNT} variations in one API call. Same quality, lower price.
+                  Generate {BATCH_COUNT} variations in one API call. Same
+                  quality, lower price.
                 </p>
               </div>
             </div>
@@ -595,11 +482,11 @@ export default function Home() {
             Dead Simple API
           </h2>
           <p className="text-gray-500 text-center mb-12 text-lg">
-            Five endpoints. Here&apos;s everything you need.
+            Four endpoints. Here&apos;s everything you need.
           </p>
 
           {/* Endpoints summary */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
             {[
               {
                 method: "GET",
@@ -609,12 +496,7 @@ export default function Home() {
               {
                 method: "POST",
                 path: "/generate",
-                desc: "Generate a logo",
-              },
-              {
-                method: "POST",
-                path: "/generate/batch",
-                desc: "Batch generate",
+                desc: "Generate an icon",
               },
               {
                 method: "GET",
@@ -688,13 +570,13 @@ export default function Home() {
             We Pay for Your Opinion
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-            Your feedback makes our logos better. Leave a review on any logo
-            you generate and get up to 30% back on your spend. Every review
-            helps us improve — and puts money back in your pocket.
+            Your feedback makes our icons better. Leave a review on any icon you
+            generate and get up to 30% back on your spend. Every review helps us
+            improve — and puts money back in your pocket.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             {[
-              "Generate a logo",
+              "Generate an icon",
               "Leave a review (1-5 stars)",
               "Get up to 30% back",
             ].map((step, i) => (
@@ -716,7 +598,7 @@ export default function Home() {
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-4xl sm:text-5xl font-extrabold mb-6">
-            Your Next Logo is One
+            Your Next Icon is One
             <br />
             <span className="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">
               API Call Away
@@ -729,7 +611,7 @@ export default function Home() {
             href="#api"
             className="inline-flex px-10 py-5 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-500/25 text-lg"
           >
-            Get Your Logo Now
+            Get Your Icon Now
           </a>
         </div>
       </section>
@@ -750,11 +632,11 @@ export default function Home() {
               </svg>
             </div>
             <span className="font-bold text-sm">
-              x402<span className="text-brand-500">.logo</span>
+              Pimp My <span className="text-brand-500">SVG</span>
             </span>
           </div>
           <p className="text-gray-400 text-sm">
-            Built with x402 protocol. Pay-per-use SVG logo generation.
+            Built with x402 protocol. Pay-per-use SVG icon generation.
           </p>
         </div>
       </footer>
