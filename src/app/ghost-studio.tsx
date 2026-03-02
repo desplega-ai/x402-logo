@@ -311,6 +311,17 @@ const PRESETS = [
 ];
 
 /* ── Hex Color Picker ─────────────────────────────── */
+/* ── HSL → Hex helper ─────────────────────────────── */
+function hslToHex(h: number, s: number, l: number): string {
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * Math.max(0, Math.min(1, color))).toString(16).padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
 function HexColorPicker({ color, onChange, size = 200 }: { color: string; onChange: (c: string) => void; size?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragging = useRef(false);
@@ -353,11 +364,17 @@ function HexColorPicker({ color, onChange, size = 200 }: { color: string; onChan
     const scaleX = size / rect.width, scaleY = size / rect.height;
     const x = (clientX - rect.left) * scaleX;
     const y = (clientY - rect.top) * scaleY;
-    const cx = size / 2, cy = size / 2;
-    const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+    const cx = size / 2, cy = size / 2, r = size / 2 - 4;
+    const dx = x - cx, dy = y - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
     if (dist > size / 2 - 2) return;
-    const pixel = canvas.getContext("2d")!.getImageData(Math.round(x), Math.round(y), 1, 1).data;
-    onChange("#" + [pixel[0], pixel[1], pixel[2]].map(v => v.toString(16).padStart(2, "0")).join(""));
+    // Calculate color from angle + distance instead of reading pixels
+    // This ensures the entire disc is interactive, not just where pixels render well
+    const angle = ((Math.atan2(dy, dx) * 180 / Math.PI) + 360) % 360;
+    const t = Math.min(dist / r, 1); // 0 at center, 1 at edge
+    const sat = t;
+    const lit = brightnessVal.current * (1 - 0.5 * t);
+    onChange(hslToHex(angle, sat, lit));
   }, [size, onChange]);
 
   const pickColor = useCallback((e: React.MouseEvent) => {
