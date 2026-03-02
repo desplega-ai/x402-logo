@@ -12,6 +12,53 @@
     }
   ],
   "paths": {
+    "/api/styles": {
+      "get": {
+        "summary": "List available styles",
+        "description": "Returns all available icon styles with their names and descriptions.",
+        "operationId": "listStyles",
+        "responses": {
+          "200": {
+            "description": "List of available styles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "styles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "Style name"
+                          },
+                          "shortDescription": {
+                            "type": "string",
+                            "description": "Brief description of the style"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to fetch styles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/generate": {
       "post": {
         "summary": "Generate a custom SVG icon",
@@ -80,14 +127,334 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "Validation error details"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "402": {
             "description": "Payment Required"
           },
-          "400": {
-            "description": "Invalid request parameters"
+          "404": {
+            "description": "Style not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generate/{jobId}/status": {
+      "get": {
+        "summary": "Check generation job status",
+        "description": "Poll the status of a generation job. Returns the generated SVG and asset token when complete.",
+        "operationId": "getJobStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Generation job ID returned by POST /api/generate"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current job status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "description": "Generation job ID"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["pending", "processing", "completed", "failed"],
+                      "description": "Current job status"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "Asset token (present when status is 'completed')"
+                    },
+                    "svg": {
+                      "type": "string",
+                      "description": "Generated SVG content (present when status is 'completed')"
+                    },
+                    "style": {
+                      "type": "string",
+                      "description": "Style name used (present when status is 'completed')"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message (present when status is 'failed')",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "Style not found"
+            "description": "Generation job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to check job status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/asset/{token}": {
+      "get": {
+        "summary": "Retrieve a generated SVG asset",
+        "description": "Retrieve a previously generated SVG asset by its token.",
+        "operationId": "getAsset",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Asset token returned by the generation job"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Asset details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "Asset token"
+                    },
+                    "svg": {
+                      "type": "string",
+                      "description": "SVG content"
+                    },
+                    "style": {
+                      "type": "string",
+                      "description": "Style name used for generation"
+                    },
+                    "brandName": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Brand name used in generation"
+                    },
+                    "brandVoice": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Brand voice used in generation"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Asset creation timestamp"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token is required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Asset not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to fetch asset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rate": {
+      "post": {
+        "summary": "Rate a generated asset",
+        "description": "Submit a rating for a generated SVG asset. Each asset token can only be rated once.",
+        "operationId": "rateAsset",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["token", "rating", "styleName"],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Asset token to rate"
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "description": "Rating value (1-5)"
+                  },
+                  "styleName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Style name of the rated asset"
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "description": "Optional text feedback"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rating submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "averageRating": {
+                      "type": "number",
+                      "description": "Updated average rating for the style"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "Validation error details"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Style not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Token has already been rated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to submit rating",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
           }
         }
       }
