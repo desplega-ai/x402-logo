@@ -346,19 +346,29 @@ function HexColorPicker({ color, onChange, size = 200 }: { color: string; onChan
     drawWheel(canvas.getContext("2d")!, brightnessVal.current);
   }, [drawWheel]);
 
-  const pickColor = useCallback((e: React.MouseEvent) => {
+  const pickColorAt = useCallback((clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const scaleX = size / rect.width, scaleY = size / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
     const cx = size / 2, cy = size / 2;
     const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
     if (dist > size / 2 - 2) return;
     const pixel = canvas.getContext("2d")!.getImageData(Math.round(x), Math.round(y), 1, 1).data;
     onChange("#" + [pixel[0], pixel[1], pixel[2]].map(v => v.toString(16).padStart(2, "0")).join(""));
   }, [size, onChange]);
+
+  const pickColor = useCallback((e: React.MouseEvent) => {
+    pickColorAt(e.clientX, e.clientY);
+  }, [pickColorAt]);
+
+  const pickColorTouch = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (touch) pickColorAt(touch.clientX, touch.clientY);
+  }, [pickColorAt]);
 
   const hexToHSL = (hex: string): [number, number] => {
     const r = parseInt(hex.slice(1, 3), 16) / 255, g = parseInt(hex.slice(3, 5), 16) / 255, b = parseInt(hex.slice(5, 7), 16) / 255;
@@ -383,11 +393,15 @@ function HexColorPicker({ color, onChange, size = 200 }: { color: string; onChan
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
       <div
-        style={{ position: "relative", width: size, height: size, cursor: "crosshair" }}
+        style={{ position: "relative", width: size, height: size, cursor: "crosshair", touchAction: "none" }}
         onMouseDown={e => { dragging.current = true; pickColor(e); }}
         onMouseMove={e => { if (dragging.current) pickColor(e); }}
         onMouseUp={() => dragging.current = false}
         onMouseLeave={() => dragging.current = false}
+        onTouchStart={e => { dragging.current = true; pickColorTouch(e); }}
+        onTouchMove={e => { if (dragging.current) pickColorTouch(e); }}
+        onTouchEnd={() => dragging.current = false}
+        onTouchCancel={() => dragging.current = false}
       >
         <canvas ref={canvasRef} width={size} height={size} style={{ borderRadius: "50%", display: "block", width: size, height: size }} />
         <div style={{ position: "absolute", left: mx - 8, top: my - 8, width: 16, height: 16, borderRadius: "50%", border: "2.5px solid #fff", boxShadow: "0 0 0 1.5px rgba(0,0,0,0.4)", background: color, pointerEvents: "none" }} />
