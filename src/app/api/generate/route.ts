@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withX402 } from "@x402/next";
+import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { prisma } from "@/lib/prisma";
 import { x402Server, evmAddress, x402Network } from "@/lib/x402";
 import { start } from "workflow/api";
@@ -99,6 +100,52 @@ export const POST = withX402(
     ],
     description: "Generate a custom SVG icon in your chosen style",
     mimeType: "application/json",
+    extensions: {
+      ...declareDiscoveryExtension({
+        bodyType: "json",
+        input: {
+          styleName: "geometric",
+          brandName: "Acme Corp",
+          brandVoice: "modern and clean",
+        },
+        inputSchema: {
+          type: "object",
+          properties: {
+            styleName: {
+              type: "string",
+              description: "Name of the icon style to use",
+            },
+            brandName: {
+              type: "string",
+              description: "Brand name to incorporate (optional)",
+            },
+            brandVoice: {
+              type: "string",
+              description: "Brand voice/style description (optional)",
+            },
+          },
+          required: ["styleName"],
+        },
+        output: {
+          example: {
+            jobId: "clx123...",
+            runId: "run_abc...",
+            status: "pending",
+          },
+          schema: {
+            type: "object",
+            properties: {
+              jobId: {
+                type: "string",
+                description: "Generation job ID for polling status",
+              },
+              runId: { type: "string", description: "Workflow run ID" },
+              status: { type: "string", enum: ["pending"] },
+            },
+          },
+        },
+      }),
+    },
   },
   x402Server,
 );
